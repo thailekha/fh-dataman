@@ -44,7 +44,8 @@
     "fh-logger": "0.5.1",
     "fh-mbaas-client": "0.16.4",
     "mongoose": "4.5.1",
-    "optimist": "0.6.1"
+    "optimist": "0.6.1",
+    "lodash": "4.17.2"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
