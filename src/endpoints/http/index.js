@@ -2,7 +2,7 @@ import {sysHealthEndpoint, sysPingEndpoint} from './sys';
 import {collectionsHandler} from './collections';
 import express from 'express';
 
-const PATH_PREFIX = "/api/:domain/:envId/:appGuid/data";
+const PATH_PREFIX = "/api/:domain/:envId/:appname/data";
 
 export default function buildEndpoints(server) {
   sysHealthEndpoint(server);

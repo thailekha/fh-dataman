@@ -12,8 +12,17 @@ var testConf = require('./test_conf.json');
 const SERVER_URL = `http://localhost:${testConf.port}`;
 const PATH_PREFIX = '/api/testing/dev/testappguid/data';
 const payload = {
-  email: 'test@email.com',
-  username: 'user101'
+  user: {
+    email: "test@email.com",
+    username: "user101",
+    domain: "testing",
+    sub: "1234subdomain"
+  },
+  businessObject: "fh-dataman-permission",
+  permission: {
+    write: true,
+    read: true
+  }
 };
 const TOKEN = jwt.sign(payload, testConf.auth.secret);
 
