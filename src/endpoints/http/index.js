@@ -8,7 +8,7 @@ export default function buildEndpoints(server) {
   sysHealthEndpoint(server);
   sysPingEndpoint(server);
 
-  var router = express.Router();
+  var router = express.Router({mergeParams:true});
   collectionsHandler(router);
   server.use(PATH_PREFIX, router);
 }

@@ -16,7 +16,7 @@ import fhconfig from 'fh-config';
 
 sinonStubPromise(sinon);
 const app = express();
-const router = express.Router();
+const router = express.Router({mergeParams:true});
 const logger = getLogger();
 var user = null;
 const appname = '123456';
