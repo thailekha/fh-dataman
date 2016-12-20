@@ -5,6 +5,13 @@ import sinon from 'sinon';
 import * as listImpl from './list';
 import {collectionsHandler} from './index';
 import {getLogger} from '../../../logger';
+import authorize from '../../../middleware/route-authorize';
+
+authorize.config = {
+  globalPermissionPath: 'user.permission',
+  globalAccessPrefix: 'user.access.',
+  globalRoutePermission: 'correctPermission'
+};
 
 var app = express();
 var router = express.Router();
@@ -12,6 +19,13 @@ var logger = getLogger();
 collectionsHandler(router);
 app.use((req, res, next) => {
   req.log = logger;
+
+  req.user = {
+    access: {
+      read: true
+    },
+    permission: 'correctPermission'
+  };
   next();
 });
 app.use('/api', router);

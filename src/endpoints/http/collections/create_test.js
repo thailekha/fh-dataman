@@ -2,6 +2,13 @@ import supertest from 'supertest';
 import express from 'express';
 import bodyParser from 'body-parser';
 import {createCollection} from './create.js';
+import authorize from '../../../middleware/route-authorize';
+
+authorize.config = {
+  globalPermissionPath: 'user.permission',
+  globalAccessPrefix: 'user.access.',
+  globalRoutePermission: 'correctPermission'
+};
 
 const collectionEndPoint = '/collections';
 const app = express();
@@ -20,6 +27,13 @@ app.use((req, res, next) => {
   req.log = {
     debug: function() {},
     trace: function() {}
+  };
+
+  req.user = {
+    access: {
+      write: true
+    },
+    permission: 'correctPermission'
   };
 
   next();

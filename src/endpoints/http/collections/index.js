@@ -1,9 +1,10 @@
 import listCollections from './list';
 import {createCollection} from './create';
+import authorize from '../../../middleware/route-authorize';
 
 export function collectionsHandler(router) {
   //list collection info
-  router.get('/collections', function(req, res, next) {
+  router.get('/collections', authorize({access: 'read'}), function(req, res, next) {
     var appname = req.param('appname');
     req.log.debug({app: appname}, 'listing collections for app');
     listCollections(req.param('appname'), req.log, req.db)

@@ -1,3 +1,5 @@
+import authorize from '../../../middleware/route-authorize';
+
 function message(message) {
   return { message };
 }
@@ -9,7 +11,7 @@ function message(message) {
  * @param {object} router - The express router.
  */
 export function createCollection(router) {
-  router.post("/collections", (req, res, next) => {
+  router.post("/collections", authorize({access: 'write'}), (req, res, next) => {
     const name = req.body.name;
     if (!name) {
       return res.status(400).send(message('name is required'));

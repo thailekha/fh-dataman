@@ -6,11 +6,29 @@ var expect = chai.expect;
 import * as mongodbClient from './mongodb_client';
 var testConf = require('./test_conf.json');
 
+import authorize from '../../lib/middleware/route-authorize';
+
+authorize.config = {
+  globalPermissionPath: 'user.businessObject',
+  globalAccessPrefix: 'user.permission.',
+  globalRoutePermission: 'fh-dataman-permission',
+  routePermissions: {}
+};
+
 const SERVER_URL = `http://localhost:${testConf.port}`;
 const PATH_PREFIX = '/api/testing/dev/testappguid/data';
 const payload = {
-  email: 'test@email.com',
-  username: 'user101'
+  user: {
+    email: "test@email.com",
+    username: "user101",
+    domain: "testing",
+    sub: "1234subdomain"
+  },
+  businessObject: "fh-dataman-permission",
+  permission: {
+    write: true,
+    read: true
+  }
 };
 const TOKEN = jwt.sign(payload, testConf.auth.secret);
 
