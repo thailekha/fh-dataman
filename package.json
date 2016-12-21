@@ -44,8 +44,7 @@
     "fh-logger": "0.5.1",
     "fh-mbaas-client": "0.16.4",
     "mongoose": "4.5.1",
-    "optimist": "0.6.1",
-    "lodash": "4.17.2"
+    "optimist": "0.6.1"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
@@ -59,6 +58,7 @@
     "load-grunt-tasks": "^3.5.2",
     "mocha": "^2.3.3",
     "nyc": "^10.0.0",
+    "proxyquire": "^1.7.10",
     "supertest": "^2.0.1",
     "sinon": "^1.17.6"
   }
