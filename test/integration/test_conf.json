@@ -1,0 +1,23 @@
+{
+  "port":9900,
+  "logger": {
+    "name": "logger",
+    "streams": [{
+      "type": "stream",
+      "src": true,
+      "level": "trace",
+      "stream": "process.stdout"
+    }, {
+      "type": "raw",
+      "src": true,
+      "level": "trace",
+      "stream": "ringBuffer"
+    }]
+  },
+  "auth": {
+    "secret": "secret"
+  },
+  "mbaas": {
+    "url": "http://localhost:9901"
+  }
+}

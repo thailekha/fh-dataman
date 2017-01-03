@@ -18,10 +18,9 @@ module.exports = function(grunt) {
     // use `grunt fh:testfile:{{unit_test_filename}}` to run a single test file
     unit_single: ['<%= _test_runner %> <%= _unit_args %> <%= unit_test_filename %>'],
 
-    accept: [],
-
     unit_cover: ['./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/nyc --reporter=lcov --reporter=cobertura --reporter=text node_modules/.bin/_mocha -u exports -t 10000 --recursive ./src/**/*_test.js'],
 
+    accept: ['./node_modules/.bin/cross-env NODE_ENV=test <%= _test_runner %> <%= _unit_args %> --recursive ./test/integration/setup.js ./test/integration/**/test_*.js'],
     accept_cover: [],
 
     "babel": {
@@ -42,8 +41,10 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-fh-build');
 
-  grunt.registerTask('test', ['eslint', 'fh:unit']);
-  grunt.registerTask('default', ['test', 'babel', 'fh:dist']);
+  grunt.registerTask('unit', ['eslint', 'fh:unit']);
+  grunt.registerTask('integration', ['eslint', 'babel', 'fh:accept']);
+
+  grunt.registerTask('default', ['eslint', 'babel', 'fh:default']);
 
   grunt.registerTask('coverage', ['clean:fh-cov', 'shell:fh-run-array:unit_cover']);
 };
