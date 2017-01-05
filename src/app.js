@@ -123,6 +123,12 @@ function startApp(logger, fhconfig) {
   //error handler
   app.use(errorHandler);
 
+  // Swagger API docs.
+  app.use('/api', express.static(path.join(__dirname, '../api-docs')));
+  app.get('/api', (req, res) => {
+    res.sendFile(path.join(__dirname, '../api-docs/index.html'));
+  });
+
   var port = fhconfig.int('port');
   app.listen(port, () => {
     // Get our version number from package.json

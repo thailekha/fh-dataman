@@ -44,8 +44,38 @@ node ./lib/app.js ./config/dev.json
 ```
 
 ## API
+To view API docs [start the service](#usage) and navigate to `/api`.
 
-//TODO
+### Swagger API docs
+If adding a new API to fh-dataman make sure to update the API docs.
+
+fh-dataman is using [Swagger](http://swagger.io) for documentation. How fh-dataman is using Swagger is a combination of [Swagger UI](https://github.com/swagger-api/swagger-ui) - a framework to generate and display the API definition in HTML - and a spec which is a a JSON object describing the [OpenAPI Specification](http://swagger.io/specification).
+
+fh-datamans' spec object is located in the [api-docs/swagger.json](api-docs/swagger.json) file.
+
+New API endpoints can be entered under the `paths` property.
+
+```
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "fh-dataman API",
+        "description": "Backend service for the RHMAP studio databrowser",
+        "version": "1.0.0"
+    },
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/",
+    "paths": {
+        "/collection": {
+          // API definition
+        },
+
+        // Add new API definition
+    }
+}
+```
 
 ## Contribute
 

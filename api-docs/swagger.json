@@ -1,0 +1,91 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "fh-dataman API",
+        "description": "Backend service for the RHMAP studio databrowser",
+        "version": "1.0.0"
+    },
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/",
+    "paths": {
+        "/collection": {
+            "post": {
+                "security": [
+                    {
+                        "JWT-Bearer": []
+                    }
+                ],
+                "summary": "Create a collection",
+                "description": "The collection endpoint creates a new collection.\n",
+                "operationId": "collection",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "name",
+                        "description": "The name of the collection",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/collectionParams"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful collection created",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing name param",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Application error",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT-Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "definitions": {
+        "Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "collectionParams": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
