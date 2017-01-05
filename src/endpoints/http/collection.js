@@ -10,15 +10,18 @@ function message(message) {
  */
 export function createCollection(server) {
   server.post("/collection", (req, res, next) => {
-    if (!req.body.name) {
+    const name = req.body.name;
+    if (!name) {
       return res.status(400).send(message('name is required'));
     }
 
+    req.log.debug({name}, 'creating new collection');
     req.db.createCollection(req.body.name, err => {
       if (err) {
         return next(err);
       }
 
+      req.log.trace({name}, 'new collection created');
       res.status(201).send(message('ok'));
     });
   });

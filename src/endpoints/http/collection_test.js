@@ -17,6 +17,11 @@ app.use((req, res, next) => {
     }
   };
 
+  req.log = {
+    debug: function() {},
+    trace: function() {}
+  };
+
   next();
 });
 
