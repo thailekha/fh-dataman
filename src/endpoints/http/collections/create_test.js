@@ -1,9 +1,9 @@
 import supertest from 'supertest';
 import express from 'express';
 import bodyParser from 'body-parser';
-import {createCollection} from './collection.js';
+import {createCollection} from './create.js';
 
-const collectionEndPoint = '/collection';
+const collectionEndPoint = '/collections';
 const app = express();
 app.use(bodyParser.json());
 app.use((req, res, next) => {

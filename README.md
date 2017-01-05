@@ -35,6 +35,16 @@ Unit tests should be added to the same directory of the test target file. It sho
 grunt test
 ```
 
+### Running Integration Tests
+
+In order to run the integration tests, you will need to have Mongodb (v2.x) running somewhere. There must be an admin user created in the `admin` Mongodb database, and it should have the full admin permission. You can then override the Mongodb settings via the following environment variables:
+
+```bash
+export MONGO_SERVER=192.168.33.10 #default to 'localhost'
+export MONGO_ADMIN_USER=admin #default to 'admin'
+export MONGO_ADMIN_PASS=password #default to 'admin'
+```
+
 ## Usage
 
 To start the service, run

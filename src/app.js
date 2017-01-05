@@ -23,6 +23,9 @@ if (!process.env.conf_file) {
   process.env.conf_file = process.argv[2];
 }
 
+const EMPTY_FUNC = function() {};
+var server;
+
 /**
  * Print out usage info
  */
@@ -31,10 +34,6 @@ function usage() {
   console.log(`Usage: ${args.$0} <config file> [-d] (debug) --master-only --workers=[int] \n --master-only will override  --workers so should not be used together`);
   /* eslint-enable no-console */
   process.exit(0);
-}
-
-if (args.h || args._.length < 1) {
-  usage();
 }
 
 /**
@@ -112,10 +111,10 @@ function startApp(logger, fhconfig) {
   app.use(bunyanLogger({ logger: logger, parseUA: false, genReqId: req => req.header(logger.requestIdHeader) }));
 
   // Authenticate requests
-  app.use(jwtAuthenticate({ secret: fhconfig.value('auth.secret') }));
+  app.use('/api', jwtAuthenticate({ secret: fhconfig.value('auth.secret') }));
 
   // Parse JSON payloads
-  app.use(bodyParser.json({limit: fhconfig.value('fhmbaas.maxpayloadsize') || "20mb"}));
+  app.use(bodyParser.json({limit: fhconfig.value('maxpayloadsize') || "20mb"}));
 
   // wire up endpoints
   buildEndpoints(app);
@@ -124,13 +123,13 @@ function startApp(logger, fhconfig) {
   app.use(errorHandler);
 
   // Swagger API docs.
-  app.use('/api', express.static(path.join(__dirname, '../api-docs')));
-  app.get('/api', (req, res) => {
+  app.use('/docs', express.static(path.join(__dirname, '../api-docs')));
+  app.get('/docs', (req, res) => {
     res.sendFile(path.join(__dirname, '../api-docs/index.html'));
   });
 
   var port = fhconfig.int('port');
-  app.listen(port, () => {
+  server = app.listen(port, () => {
     // Get our version number from package.json
     var pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), "utf8"));
     /* eslint-disable no-console */
@@ -139,18 +138,15 @@ function startApp(logger, fhconfig) {
   });
 }
 
-
-function main() {
+export function startServer(cb = EMPTY_FUNC) {
   setupConfig()
   .then(config => {
     const logger = setupLogger(fhconfig);
     return {logger, config};
   })
   .then(param => {
-    if (args.d === true || args["master-only"] === true) {
-      /* eslint-disable no-console */
-      console.log("starting single master process");
-      /* eslint-enable no-console */
+    if (args.d === true || args["master-only"] === true || process.env.NODE_ENV === 'test') {
+      param.logger.info("starting single master process");
       startWorker(param.logger, param.config);
     } else {
       var numWorkers = args["workers"];
@@ -159,12 +155,45 @@ function main() {
       }, numWorkers);
     }
   })
+  .then(cb)
   .catch(err => {
     /* eslint-disable no-console */
     console.error("error on startup ", err);
     /* eslint-enable no-console */
-    process.exit(1);
+    return cb(err);
   });
 }
 
-main();
+/**
+ * Stop the server. Used for testing purpose.
+ */
+export function stopServer(cb = EMPTY_FUNC) {
+  if (server) {
+    /* eslint-disable no-console */
+    console.log("stopping server");
+    /* eslint-enable no-console */
+    server.close( err => {
+      /* eslint-disable no-console */
+      console.log("server stopped");
+      /* eslint-enable no-console */
+      return cb(err);
+    });
+  } else {
+    /* eslint-disable no-console */
+    console.log("server is not started");
+    /* eslint-enable no-console */
+    return cb();
+  }
+}
+
+if (require.main === module) {
+  if (args.h || args._.length < 1) {
+    usage();
+  }
+  startServer(function(err) {
+    if (err) {
+      process.exit(1);
+    }
+  });
+}
+

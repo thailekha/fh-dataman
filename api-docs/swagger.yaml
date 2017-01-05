@@ -1,0 +1,127 @@
+swagger: '2.0'
+info:
+  title: fh-dataman API
+  description: Backend service for the RHMAP studio databrowser
+  version: 1.0.0
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+basePath: /api
+security:
+  - JWT-Bearer: []
+paths:
+  '/{domain}/{envId}/{appGuid}/data/collections':
+    parameters:
+      - $ref: "#/parameters/domain"
+      - $ref: "#/parameters/envId"
+      - $ref: "#/parameters/appGuid"
+    get:
+      summary: List collections for the given app
+      description: |
+        Return the list of collections of the app.
+      operationId: listCollections
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: Collections listed successfully
+          schema:
+            $ref: '#/definitions/CollectionsListResponse'
+        '400':
+          description: Missing param
+          schema:
+            $ref: '#/definitions/BadRequestResponse'
+        '500':
+          description: Application error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    post:
+      summary: Create a collection
+      description: |
+        The collection endpoint creates a new collection.
+      operationId: createCollection
+      parameters:
+        - in: body
+          name: name
+          description: The name of the collection
+          required: true
+          schema:
+            $ref: '#/definitions/CreateCollectionParams'
+      tags:
+        - Collections
+      responses:
+        '201':
+          description: Successful collection created
+          schema:
+            $ref: '#/definitions/CreationSuccessResponse'
+        '400':
+          description: Missing name param
+          schema:
+            $ref: '#/definitions/BadRequestResponse'
+        '500':
+          description: Application error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+parameters:
+  domain:
+    name: domain
+    in: path
+    description: the domain of the app
+    type: string
+    required: true
+  envId:
+    name: envId
+    in: path
+    description: the environment id
+    type: string
+    required: true
+  appGuid:
+    name: appGuid
+    in: path
+    description: the guid of the app
+    type: string
+    required: true
+securityDefinitions:
+  JWT-Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+definitions:
+  GeneralMessage:
+    type: object
+    properties:
+      message:
+        type: string
+  CreationSuccessResponse:
+    $ref: '#/definitions/GeneralMessage'
+  BadRequestResponse:
+    $ref: '#/definitions/GeneralMessage'
+  ErrorResponse:
+    $ref: '#/definitions/GeneralMessage'
+  CollectionInfo:
+    type: object
+    properties:
+      ns:
+        type: string
+        description: the namespace of the collection
+      name:
+        type: string
+        description: the name of the collection
+      count:
+        type: integer
+        description: the number of documents in the collection
+      size:
+        type: integer
+        description: the size of the collection in bytes
+  CollectionsListResponse:
+    type: array
+    items:
+      $ref: '#/definitions/CollectionInfo'
+  CreateCollectionParams:
+    type: object
+    properties:
+      name:
+        type: string
