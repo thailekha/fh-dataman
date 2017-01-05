@@ -15,6 +15,7 @@ import buildEndpoints from './endpoints/http';
 import errorHandler from './endpoints/http/error.js';
 import {setLogger} from './logger';
 import validation from '../config/validation';
+import dbConnection from './middleware/dbConnection';
 
 var TITLE = "fh-dataman";
 process.env.component = TITLE;
@@ -111,6 +112,9 @@ function startApp(logger, fhconfig) {
 
   // Parse JSON payloads
   app.use(bodyParser.json({limit: fhconfig.value('fhmbaas.maxpayloadsize') || "20mb"}));
+
+  // Create db connection for given app
+  app.use(dbConnection(fhconfig.mbaasConf));
 
   // wire up endpoints
   buildEndpoints(app);
