@@ -123,8 +123,8 @@ function startApp(logger, fhconfig) {
   app.use(errorHandler);
 
   // Swagger API docs.
-  app.use('/api', express.static(path.join(__dirname, '../api-docs')));
-  app.get('/api', (req, res) => {
+  app.use('/docs', express.static(path.join(__dirname, '../api-docs')));
+  app.get('/docs', (req, res) => {
     res.sendFile(path.join(__dirname, '../api-docs/index.html'));
   });
 

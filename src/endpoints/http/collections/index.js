@@ -1,4 +1,5 @@
 import listCollections from './list';
+import {createCollection} from './create';
 
 export function collectionsHandler(router) {
   //list collection info
@@ -12,4 +13,6 @@ export function collectionsHandler(router) {
       })
       .catch(next);
   });
+  //create collection
+  createCollection(router);
 }

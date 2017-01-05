@@ -6,10 +6,10 @@ function message(message) {
  * Add the route to create a new collection for the users App.
  * This route expects a db connection to be present on the request object.
  *
- * @param {object} server - The express server.
+ * @param {object} router - The express router.
  */
-export function createCollection(server) {
-  server.post("/collection", (req, res, next) => {
+export function createCollection(router) {
+  router.post("/collections", (req, res, next) => {
     const name = req.body.name;
     if (!name) {
       return res.status(400).send(message('name is required'));

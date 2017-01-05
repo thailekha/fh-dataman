@@ -40,6 +40,18 @@ module.exports = {
             expect(col2[0].count).to.equal(COLLECTIONS[1].docs.length);
             done();
           });
+    },
+
+    'test_collection_create': function(done) {
+      chai.request(SERVER_URL)
+          .post(`${PATH_PREFIX}/collections`)
+          .send({name: 'test_create'})
+          .set('Authorization', `Bearer ${TOKEN}`)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(201);
+            done();
+          });
     }
   }
 };
