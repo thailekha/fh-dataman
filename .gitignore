@@ -26,6 +26,7 @@ plato
 .idea
 conf-docker.json
 *.swp
-lib/
-lib
+/lib/
+/lib
 .nyc_output
+.vscode

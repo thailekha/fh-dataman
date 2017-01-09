@@ -32,6 +32,7 @@
   },
   "preferGlobal": true,
   "dependencies": {
+    "async": "2.1.4",
     "body-parser": "1.15.2",
     "compression": "1.6.2",
     "cookie-parser": "1.4.3",
@@ -43,23 +44,29 @@
     "fh-db": "feedhenry/fh-db",
     "fh-logger": "0.5.1",
     "fh-mbaas-client": "0.16.4",
+    "jsonwebtoken": "7.2.1",
+    "lodash": "4.17.2",
     "mongoose": "4.5.1",
-    "optimist": "0.6.1"
+    "optimist": "0.6.1",
+    "request": "2.79.0"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
     "babel-plugin-istanbul": "^3.0.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-register": "^6.18.0",
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
     "cross-env": "^3.1.3",
     "grunt": "^1.0.1",
     "grunt-babel": "^6.0.0",
     "grunt-fh-build": "^1.0.2",
     "load-grunt-tasks": "^3.5.2",
     "mocha": "^2.3.3",
+    "mongodb": "^2.2.19",
     "nyc": "^10.0.0",
     "proxyquire": "^1.7.10",
-    "supertest": "^2.0.1",
-    "sinon": "^1.17.6"
+    "sinon": "^1.17.6",
+    "supertest": "^2.0.1"
   }
 }

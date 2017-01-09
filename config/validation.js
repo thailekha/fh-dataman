@@ -1,1 +1,1 @@
-module.exports = validation = [];
+module.exports = [];

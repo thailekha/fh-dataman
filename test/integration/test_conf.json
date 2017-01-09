@@ -1,5 +1,5 @@
 {
-  "port":9000,
+  "port":9900,
   "logger": {
     "name": "logger",
     "streams": [{
@@ -16,5 +16,8 @@
   },
   "auth": {
     "secret": "secret"
+  },
+  "mbaas": {
+    "url": "http://localhost:9901"
   }
 }
