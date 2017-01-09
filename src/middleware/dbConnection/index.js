@@ -40,14 +40,19 @@ export default options => {
             connectionUrl: options.FH_MONGODB_CONN_URL
           };
         }
-        fhdb.createMongoCompatApi(dbparams, function(err, db) { // resolves mongo handle and attaches url to req object
+        fhdb.createMongoCompatApi(dbparams, function(err, resp) { // create connection to db, resolve mongo handle and attaches url to req object
           if (err) {
             next(err);
           } else {
-            req.db = db;
+            req.db = resp;
             next();
           }
         });
+      }
+    });
+    res.once('end', () => {
+      if (req.db) {
+        req.db.close();
       }
     });
   }
