@@ -7,9 +7,9 @@ import * as mongodbClient from './mongodb_client';
 
 var app = express();
 //TODO: change the path here to be the right one
-app.get('/', function(req, res) {
+app.get('/api/mbaas/apps/:domain/:environment/:appname/env', function(req, res) {
   console.log('returning mock mongdb url', mongodbClient.MONGODBURL);
-  return res.json({db: mongodbClient.MONGODBURL});
+  return res.json({FH_MONGODB_CONN_URL: mongodbClient.MONGODBURL});
 });
 
 var server;

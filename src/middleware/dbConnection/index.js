@@ -6,10 +6,6 @@ import fhdb from 'fh-db';
    */
 export default options => {
 
-  if (!options.mbaasConf) {
-    throw new Error('mbaas configuration required');
-  }
-
   /**
    * Middleware to establish the database connection for a given app.
    *
@@ -18,39 +14,29 @@ export default options => {
    * @param {object} next
    */
   function middleware(req, res, next) {
-    const client = new fhMbaasClient.MbaasClient(req.envId, options.mbaasConf);
+    const client = new fhMbaasClient.MbaasClient(req.envId, options);
     client.admin.apps.envVars.get({ // Get the app's environment variables by calling on fh-mbaas-client
       domain: req.domain || {},
       environment: req.envId,
       appname: req.appname || {}
     }, function(err, resp) {
       if (err) {
-        next(err);
-      } else {
-        const appEnvVars = resp;
-        let dbparams = {};
-        if (appEnvVars && appEnvVars.FH_MONGODB_CONN_URL) {
-          dbparams = {
-            __dbperapp: true, // true when using dedicated db.
-            connectionUrl: appEnvVars.FH_MONGODB_CONN_URL
-          };
-        } else {
-          dbparams = {
-            __dbperapp: false, // false when using shared db.
-            connectionUrl: options.FH_MONGODB_CONN_URL
-          };
-        }
-        fhdb.createMongoCompatApi(dbparams, function(err, resp) { // create connection to db, resolve mongo handle and attaches url to req object
-          if (err) {
-            next(err);
-          } else {
-            req.db = resp;
-            next();
-          }
-        });
+        return next(err);
       }
+      req.log.debug({envvars: resp}, 'got env vars');
+      const appEnvVars = resp;
+      const isDedicatedDb = !!(appEnvVars && appEnvVars.FH_MONGODB_CONN_URL);
+      const params = {
+        __dbperapp: isDedicatedDb, // True for dedicated db and false for shared db
+        connectionUrl: isDedicatedDb ? appEnvVars.FH_MONGODB_CONN_URL : options.FH_MONGODB_CONN_URL
+      };
+      fhdb.createMongoCompatApi(params).then(db => {
+        req.log.info({db: db}, 'mongodb connection set');
+        req.db = db;
+        next();
+      }).catch(next);
     });
-    res.once('end', () => {
+    res.once('end', () => { // Close db connection once 'end' event is emitted
       if (req.db) {
         req.db.close();
       }

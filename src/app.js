@@ -118,7 +118,7 @@ function startApp(logger, fhconfig) {
   app.use(bodyParser.json({limit: fhconfig.value('maxpayloadsize') || "20mb"}));
 
   // Create db connection for given app
-  app.use(dbConnection(fhconfig.mbaasConf));
+  app.use('/api', dbConnection(fhconfig.value('fh-mbaas')));
 
   // wire up endpoints
   buildEndpoints(app);

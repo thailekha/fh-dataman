@@ -1,11 +1,13 @@
 import assert from 'assert';
 import proxyquire from 'proxyquire';
 import sinon from 'sinon';
+import sinonStubPromise from 'sinon-stub-promise';
 import mockMbaasClient from './mocks/fhMbaasClientMock';
 import EventEmitter from 'events';
 
+sinonStubPromise(sinon);
 const mbaasClientStub = sinon.stub();
-const fhDbStub = sinon.stub();
+const fhDbStub = sinon.stub().returnsPromise();
 class MyEmitter extends EventEmitter {}
 const middleware = proxyquire('../', {
   'fh-mbaas-client': {
@@ -18,11 +20,18 @@ const middleware = proxyquire('../', {
 
 export function establishDedicatedDbConnection(done) {
   const mockRes = new MyEmitter();
-  const mockReq = {envId: 101, db: ''};
+  const mockReq = {
+    envId: 101,
+    db: '',
+    log: {
+      debug: function() {},
+      info: function() {}
+    }
+  };
   mbaasClientStub.yields(null, {
     FH_MONGODB_CONN_URL: 'dedicatedconnection'
   });
-  fhDbStub.yields(null, 'dedicatedconnection');
+  fhDbStub.resolves('dedicatedconnection');
   const underTest = middleware.default({mbaasConf: {}});
   underTest(mockReq, mockRes, err => {
     assert.equal(mockReq.db, 'dedicatedconnection');
@@ -34,9 +43,16 @@ export function establishDedicatedDbConnection(done) {
 
 export function establishSharedDbConnection(done) {
   const mockRes = new MyEmitter();
-  const mockReq = {envId: 102, db: ''};
-  mbaasClientStub.yields( null, {});
-  fhDbStub.yields(null, 'sharedconnection');
+  const mockReq = {
+    envId: 102,
+    db: '',
+    log: {
+      debug: function() {},
+      info: function() {}
+    }
+  };
+  mbaasClientStub.yields(null, {});
+  fhDbStub.resolves('sharedconnection');
   const underTest = middleware.default({
     mbaasConf: {},
     FH_MONGODB_CONN_URL: 'sharedconnection'
@@ -49,17 +65,13 @@ export function establishSharedDbConnection(done) {
   });
 }
 
-export function mbaasConfigRequired(done) {
-  const mockRes = new MyEmitter();
-  assert.throws(function() {
-    middleware.default({});
-  }, Error, 'mbaas configuration required');
-  mockRes.emit('end');
-  done();
-}
-
 export function missingMbaasClientParams(done) {
-  const mockReq = {};
+  const mockReq = {
+    log: {
+      debug: function() {},
+      info: function() {}
+    }
+  };
   const mockRes = new MyEmitter();
   mbaasClientStub.yields( {}, null);
   const underTest = middleware.default({mbaasConf: {}});
@@ -71,10 +83,15 @@ export function missingMbaasClientParams(done) {
 }
 
 export function errorEstablishingDbConnection(done) {
-  const mockReq = {};
+  const mockReq = {
+    log: {
+      debug: function() {},
+      info: function() {}
+    }
+  };
   const mockRes = new MyEmitter();
   mbaasClientStub.yields(null, {});
-  fhDbStub.yields({}, null);
+  fhDbStub.rejects('error');
   const underTest = middleware.default({mbaasConf: {}});
   underTest(mockReq, mockRes, err => {
     assert.ok(err);
