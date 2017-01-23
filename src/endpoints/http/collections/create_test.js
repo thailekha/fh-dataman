@@ -1,61 +1,23 @@
-import supertest from 'supertest';
-import express from 'express';
-import bodyParser from 'body-parser';
-import {createCollection} from './create.js';
+import assert from 'assert';
+import createCollection from './create';
+import sinon from 'sinon';
+import {getLogger} from '../../../logger';
 
-const collectionEndPoint = '/collections';
-const app = express();
-app.use(bodyParser.json());
-app.use((req, res, next) => {
-  req.db = {
-    createCollection: (name, cb) => {
-      if (name === 'fail') {
-        return cb(new Error('db error'));
-      }
+const logger = getLogger();
+const createCollectionStub = sinon.stub();
 
-      cb();
-    }
-  };
+const mockDb = {
+  createCollection: createCollectionStub
+};
 
-  req.log = {
-    debug: function() {},
-    trace: function() {}
-  };
-
-  next();
-});
-
-export function testNameParamRequired(done) {
-  createCollection(app);
-
-  supertest(app)
-    .post(collectionEndPoint)
-    .expect(400)
-    .expect(res => {
-      res.message = 'name is required';
-    })
-    .end(done);
+export function testCreateCollection(done) {
+  createCollectionStub.returns(true);
+  assert.equal(createCollection('test-create-collection', logger, mockDb, 'testCollection'), true);
+  done();
 }
 
-export function dbError(done) {
-  createCollection(app);
-
-  supertest(app)
-    .post(collectionEndPoint)
-    .send({ name: 'fail' })
-    .expect(500)
-    .expect(res => {
-      res.message = 'db error';
-    })
-    .end(done);
-}
-
-export function testCreateCollectionSuccess(done) {
-  createCollection(app);
-
-  supertest(app)
-    .post(collectionEndPoint)
-    .send({ name: 'success' })
-    .expect(201)
-    .end(done);
+export function testCreateCollectionFailure(done) {
+  createCollectionStub.returns(false);
+  assert.equal(createCollection('test-create-collection', logger, mockDb, 'testCollection'), false);
+  done();
 }
