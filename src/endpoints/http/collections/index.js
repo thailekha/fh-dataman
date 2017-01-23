@@ -1,6 +1,7 @@
 import listCollections from './list';
 import createCollection from './create';
 import deleteCollections from './delete';
+import fileRoutes from './files';
 
 export function collectionsHandler(router) {
   //list collection info
@@ -50,4 +51,6 @@ export function collectionsHandler(router) {
       })
       .catch(next);
   });
+
+  fileRoutes(router);
 }

@@ -16,7 +16,7 @@ import errorHandler from './endpoints/http/error.js';
 import {setLogger} from './logger';
 import validation from '../config/validation';
 import dbConnection from './middleware/dbConnection';
-import jwtAuthenticate from './middleware/jwt-authenticate';
+// import jwtAuthenticate from './middleware/jwt-authenticate';
 
 var TITLE = "fh-dataman";
 process.env.component = TITLE;
@@ -112,7 +112,7 @@ function startApp(logger, fhconfig) {
   app.use(bunyanLogger({ logger: logger, parseUA: false, genReqId: req => req.header(logger.requestIdHeader) }));
 
   // Authenticate requests
-  app.use('/api', jwtAuthenticate({ secret: fhconfig.value('auth.secret') }));
+  // app.use('/api', jwtAuthenticate({ secret: fhconfig.value('auth.secret') }));
 
   // Parse JSON payloads
   app.use(bodyParser.json({limit: fhconfig.value('maxpayloadsize') || "20mb"}));
