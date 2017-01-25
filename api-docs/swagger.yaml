@@ -65,6 +65,33 @@ paths:
           description: Application error
           schema:
             $ref: '#/definitions/ErrorResponse'
+    delete:
+      summary: Delete collection(s)
+      description: |
+        Deletes collection(s) in the app.
+      operationId: deleteCollections
+      parameters:
+        - in: query
+          name: names
+          description: The names of collections
+          required: true
+          schema:
+            $ref: '#/definitions/DeleteCollectionParams'
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: Successful collection(s) deleted.
+          schema:
+            $ref: '#/definitions/DeletionSuccessResponse'
+        '400':
+          description: Missing name param
+          schema:
+            $ref: '#/definitions/BadRequestResponse'
+        '500':
+          description: Application error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
 parameters:
   domain:
     name: domain
@@ -97,6 +124,8 @@ definitions:
         type: string
   CreationSuccessResponse:
     $ref: '#/definitions/GeneralMessage'
+  DeletionSuccessResponse:
+    $ref: '#/definitions/GeneralMessage'
   BadRequestResponse:
     $ref: '#/definitions/GeneralMessage'
   ErrorResponse:
@@ -124,4 +153,9 @@ definitions:
     type: object
     properties:
       name:
+        type: string
+  DeleteCollectionParams:
+    type: string
+    properties:
+      names:
         type: string
