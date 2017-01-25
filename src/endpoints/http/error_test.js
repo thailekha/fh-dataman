@@ -1,11 +1,12 @@
 import errorHandler from "./error.js";
 import sinon from "sinon";
 import assert from "assert";
+import {getLogger} from '../../logger';
+
+const logger = getLogger();
 
 var req = {
-  log: {
-    error: function() {}
-  }
+  log: logger
 };
 
 export function testValidationError(done) {
