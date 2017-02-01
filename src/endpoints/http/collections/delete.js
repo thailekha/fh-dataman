@@ -1,9 +1,97 @@
 const _ = require('ramda');
 
+//===================
+// Reusable (start)
+//===================
+
+/* For debugging
+const log = _.curry(function (id,x){
+  console.log('=====');
+  console.log('logger ' + id);
+  console.dir(x);
+  console.log('=====');
+  return x;
+});
+*/
+
+//=====================================
+//Functor and Functor utilities (start)
+//=====================================
+
+const Maybe = function(x) {
+  this.__value = x;
+};
+
+Maybe.of = function(x) {
+  return new Maybe(x);
+};
+
+Maybe.prototype.isNothing = function() {
+  return this.__value === undefined || this.__value === null;
+};
+
+Maybe.prototype.map = function(f) {
+  return this.isNothing() ? Maybe.of(null) : Maybe.of(f(this.__value));
+};
+
+Maybe.prototype.join = function() {
+  return this.isNothing() ? Maybe.of(null) : this.__value;
+};
+
+Maybe.prototype.chain = function(f) {
+  this.map(f).join();
+};
+
+/**
+ * Pull out the value from the functor
+ */
+//  maybe :: b -> (a -> b) -> Maybe a -> b
+const maybe = _.curry(function(err, f, functor) {
+  return functor.isNothing() ? err : f(functor.__value);
+});
+
+/**
+ * Apply a function on a functor
+ */
+const map = _.curry((f, functor) => functor.map(f));
+
+/**
+ * Apply a function that returns a functor on a functor
+ */
+const chain = _.curry(function(f, functor) {
+  return functor.map(f).join();
+});
+
+const conditionalIdentity = _.curry(function(predicate, item) {
+  return predicate(item) ? Maybe.of(item) : Maybe.of(null);
+});
+
+//=====================================
+//Functor and Functor utilities (end)
+//=====================================
+
+//=======================
+//Other utilities (start)
+//=======================
+
+const identity = x => x;
+
+/**
+ * Greater than or equal to
+ */
+const gte = _.curry(function(y, x) {
+  return x >= y;
+});
+
 /**
  *  Get index of an item in an array
  */
 const indexIn = _.curry((xs, x) => xs.indexOf(x));
+
+/**
+ * Check if an item is an an array
+ */
+const isInArray = xs => _.compose(gte(0), indexIn(xs));
 
 /**
  * Push an item onto an array and return the array
@@ -13,20 +101,18 @@ const pushAndReturn = _.curry(function(xs, x) {
   return xs;
 });
 
-/**
- * Greater than or equal to
- */
-const gte = _.curry((y, x) => x >= y);
+//safeProp :: string -> a -> b
+const safeProp = _.curry(function(prop, obj) {
+  return obj.hasOwnProperty(prop) ? Maybe.of(obj[prop]) : Maybe.of(null);
+});
 
-/**
- * Invoke a method of any object, use no argument
- */
-const call0 = _.invoker(0);
+//=======================
+//Other utilities (end)
+//=======================
 
-/**
- * Invoke a method of any object, use 1 argument
- */
-const call1 = _.invoker(1);
+//===================
+// Reusable (end)
+//===================
 
 /**
  * Deletes collection(s) for a given app.
@@ -39,22 +125,26 @@ const call1 = _.invoker(1);
  */
 const deleteCollection = _.curry(function(appname, logger, db, collection) {
   logger.debug({appname}, 'deleting collection');
-
   const handlerDeleted = () => ({name: collection});
-
-  return _.pipe(call1('dropCollection')(collection), call1('then')(handlerDeleted))(db); //send db through the pipe
+  return db.dropCollection(collection).then(handlerDeleted); //send db through the pipe
 });
 
 export default function deleteCollections(appname, logger, db, reqCollections) {
-  //for filtering
-  const collectionItemPredicate = _.compose(gte(0), indexIn(reqCollections), _.prop('name'));
+  //const collectionItemPredicate = _.compose(maybe(false,identity), map(isInArray(reqCollections)), safeProp('name'));
+  const filterCollectionItem = conditionalIdentity(isInArray(reqCollections));
 
   //for reducing
-  const collectDeletePromises = (accPromises, item) => _.compose(pushAndReturn(accPromises), deleteCollection(appname, logger, db), _.prop('name'))(item); //apply item to the composed function
+  // :: [a] -> a -> [a]
+  const filterAndCollectDeletePromises = (accPromises, item) => _.compose(
+    maybe(accPromises,identity),
+      map(_.compose(pushAndReturn(accPromises),deleteCollection(appname, logger, db))), 
+        chain(filterCollectionItem),
+          safeProp('name')
+  )(item); //apply item to the composed function
 
   const promiseAll = xs => Promise.all(xs);
 
-  const handleSucessfulListCollections = collections => _.compose(promiseAll, _.reduce(collectDeletePromises,[]), _.filter(collectionItemPredicate))(collections); //apply collection to the composed function
+  const handleSucessfulListCollections = collections => _.compose(promiseAll,_.reduce(filterAndCollectDeletePromises,[]))(collections); //apply collection to the composed function
 
-  return  _.pipe(call0('listCollections'), call0('toArray'), call1('then')(handleSucessfulListCollections))(db); //send db through the pipe
+  return db.listCollections().toArray().then(handleSucessfulListCollections);
 }
