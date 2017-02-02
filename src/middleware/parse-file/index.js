@@ -31,6 +31,7 @@ export default function() {
 
     busboy.on('error', next);
 
+    //what does this do?
     req.pipe(busboy);
 
   };

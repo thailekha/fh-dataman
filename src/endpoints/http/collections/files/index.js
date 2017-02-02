@@ -14,6 +14,7 @@ export default router => {
       return next({message: 'No file', code: BAD_REQUEST});
     }
 
+    //must be available before /collections/upload' is called
     req.file
       .pipe(new InsertStream({db: req.db}))
       .on('finish', () => {
