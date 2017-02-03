@@ -8,13 +8,11 @@ var defaultOptions = {
 };
 
 function insert(data, fn, cb) {
-  //why not mongoose ?
   this.db.collection('members')[fn](data, cb);
 }
 
 /**
  * TODO: docs
- * what is cb ?
  */
 var InsertMixin = Base => class extends Base {
 
