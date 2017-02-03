@@ -1,0 +1,3 @@
+{"_id":{"$oid":"589362430afa40f203d93cf8"},"name":"1","age":19.0,"status":"P","likes":["golf","racquetball"]}
+{"_id":{"$oid":"5893626b0afa40f203d93cf9"},"name":"2","age":32.0,"status":"P","likes":["golf","racquetball"]}
+{"_id":{"$oid":"589362830afa40f203d93cfa"},"name":"3","age":32.0,"status":"P","likes":["golf","racquetball"]}
