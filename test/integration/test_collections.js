@@ -67,5 +67,7 @@ module.exports = {
            done();
          });
     }
+
+    //test if can upload files to the endpoint, attach file suing chai request (csv 1st)
   }
 };

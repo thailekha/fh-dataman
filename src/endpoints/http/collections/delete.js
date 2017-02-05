@@ -5,13 +5,13 @@ const _r = require('ramda');
 //===================
 
 //For debugging
-const log = _r.curry(function (id,x){
-  console.log('=====');
-  console.log('logger ' + id);
-  console.dir(x);
-  console.log('=====');
-  return x;
-});
+// const log = _r.curry(function (id,x){
+//   console.log('=====');
+//   console.log('logger ' + id);
+//   console.dir(x);
+//   console.log('=====');
+//   return x;
+// });
 
 //=====================================
 //Functor and Functor utilities (start)
@@ -19,6 +19,7 @@ const log = _r.curry(function (id,x){
 
 /**
  * Either Left functor
+ * @constructor
  * @param {any} x Anything to be held in the functor
  */
 const Left = function(x) {
@@ -26,8 +27,7 @@ const Left = function(x) {
 };
 
 /**
- * Construct a Left functor
- * @constructor
+ * Helper for constructing a Left functor
  * @param {any} x Anything to be held in the functor
  * @return {Left} Left functor
  */
@@ -36,7 +36,7 @@ Left.of = function(x) {
 };
 
 /**
- * Identity
+ * Does nothing
  * @return {Left} Left functor
  */
 Left.prototype.map = function() {
@@ -44,7 +44,7 @@ Left.prototype.map = function() {
 };
 
 /**
- * Identity
+ * Does nothing
  * @return {Left} Left functor
  */
 Left.prototype.join = function() {
@@ -52,7 +52,7 @@ Left.prototype.join = function() {
 };
 
 /**
- * Identity
+ * Does nothing
  * @return {Left} Left functor
  */
 Left.prototype.chain = function() {
@@ -61,6 +61,7 @@ Left.prototype.chain = function() {
 
 /**
  * Either Right functor
+ * @constructor
  * @param {any} x Anything to be held in the functor
  */
 const Right = function(x) {
@@ -68,8 +69,7 @@ const Right = function(x) {
 };
 
 /**
- * Construct a Right functor
- * @constructor
+ * Helper for constructing a Right functor
  * @param {any} x Anything to be held in the functor
  * @return {Right} Right functor
  */
@@ -106,18 +106,18 @@ Right.prototype.chain = function(f) {
 };
 
 /**
- * Retrieve the actual value from the functor and apply a function on it
- * @param {any} err Anything to be returned if the functor is a Left
- * @param {function} f The function to be applied on the actual value
- * @param {functor} functor The functor that holds the desired value
+ * Pull out the value inside an Either functor
+ * @param {function} f Function to be applied on the value
+ * after having been pulled out of the functor (if the functor is Left)
+ * @param {function} f Function to be applied on the value
+ * after having been pulled out of the functor (if the functor is Right)
  * @returns {any}
  */
-const either = _r.curry(function(err,f,functor) {
+const either = _r.curry(function(fL,fR,functor) {
   switch (functor.constructor) {
-  case Left: return (err === undefined || err === null) ? functor : err; //???
-  case Right: return f(functor.__value);
+  case Left: return fL(functor.__value);
+  case Right: return fR(functor.__value);
   }
-  //may need to throw exception here for invalid functor
 });
 
 /**
@@ -126,7 +126,7 @@ const either = _r.curry(function(err,f,functor) {
  * @param {functor} functor Functor which the function will be applied on
  * @return {functor}
  */
-const _m = _r.curry(function(f, functor) {
+const map = _r.curry(function(f, functor) {
   return functor.map(f);
 });
 
@@ -137,7 +137,7 @@ const _m = _r.curry(function(f, functor) {
  * @param {functor} functor Functor which the function will be applied on
  * @return {functor}
  */
-const _c = _r.curry(function(f, functor) {
+const chain = _r.curry(function(f, functor) {
   return functor.map(f).join();
 });
 
@@ -148,7 +148,7 @@ const _c = _r.curry(function(f, functor) {
  * @returns {functor}
  */
 const safeProp = _r.curry(function(prop, obj) {
-  return obj.hasOwnProperty(prop) ? Right.of(obj[prop]) : Left.of("Object does not have " + prop + " property");
+  return obj.hasOwnProperty(prop) ? Right.of(obj[prop]) : Left.of(`Object does not have ${prop} property`);
 });
 
 /**
@@ -158,7 +158,7 @@ const safeProp = _r.curry(function(prop, obj) {
  * @return {functor}
  */
 const conditionalIdentity = _r.curry(function(predicate, item) {
-  return predicate(item) ? Right.of(item) : Left.of("Item " + item + " does not satisfy predicate");
+  return predicate(item) ? Right.of(item) : Left.of(`Item ${item} does not satisfy predicate`);
 });
 
 //=====================================
@@ -206,10 +206,25 @@ const isInArray = xs => _r.compose(gte(0), indexIn(xs));
  * @param {object} x The item to be pushed on the array
  * @returns {[]} The array with the new item added
  */
-const pushAndReturn = _r.curry(function(xs, x) {
+const pushTo = _r.curry(function(xs, x) {
   xs.push(x);
   return xs;
 });
+
+/**
+ * Point-free style for doing Promise.all
+ * @param {[]} xs array of Promises
+ * @returns Promise
+ */
+const promisifyAll = xs => Promise.all(xs);
+
+/**
+ * Takes in 2 arguments, returns the first and ignore the later
+ * @param {any} value
+ * @param {any} ignored
+ * @return {any}
+ */
+const replaceWith = _r.curry((value, ignored) => value); // eslint-disable-line no-unused-vars
 
 //=======================
 //Other utilities (end)
@@ -231,31 +246,19 @@ const pushAndReturn = _r.curry(function(xs, x) {
 const deleteCollection = _r.curry(function(appname, logger, db, collection) {
   logger.debug({appname}, 'deleting collection');
 
-  const handlerDeleted = () => ({name: collection});
-
-  return db.dropCollection(collection).then(handlerDeleted); //send db through the pipe
+  return db.dropCollection(collection).then(() => ({name: collection}));
 });
 
 export default function deleteCollections(appname, logger, db, reqCollections) {
-  const promiseAll = xs => Promise.all(xs);
-
-  const collectionArrays = db => db.listCollections().toArray();
-
-  const filterCollectionItem = conditionalIdentity(isInArray(reqCollections));
-
-  const filterAndCollectDeletePromises = (accPromises, item) => _r.compose(
-    either(accPromises,identity), //temporary solution, discouraged
-    _m(_r.compose(pushAndReturn(accPromises),deleteCollection(appname, logger, db))), 
-    _c(filterCollectionItem),
-    safeProp('nam')
+  const filterAndDoDelete = (accPromises, item) => _r.compose(
+    either(replaceWith(accPromises),identity), //temporary solution, discouraged
+      map(pushTo(accPromises)),
+        map(deleteCollection(appname, logger, db)),
+          chain(conditionalIdentity(isInArray(reqCollections))),
+            safeProp('name')
   )(item); //apply item to the composed function
 
-  const handleSucessfulListCollections = collections => _r.compose(log(1),promiseAll,log(0),_r.reduce(filterAndCollectDeletePromises,[]))(collections); //apply collection to the composed function
+  const promisifyDeleteCollections = collections => _r.compose(promisifyAll,_r.reduce(filterAndDoDelete,[]))(collections); //apply collection to the composed function
 
-  var result = .then(handleSucessfulListCollections);
-
-  console.log(result);
-
-  return result;
-  //return db.listCollections().toArray().then(handleSucessfulListCollections);
+  return db.listCollections().toArray().then(promisifyDeleteCollections);
 }
