@@ -8,9 +8,9 @@ const parseFile = proxyquire('../', {
 });
 
 const parserInfo = [
-  {ext: 'csv', mimeType: 'text/csv'},
-  {ext: 'json', mimeType: 'application/json'},
-  {ext: 'bson', mimeType: 'application/octet-stream'}
+  {ext: 'csv', mimeType: 'text/csv'}//,
+  // {ext: 'json', mimeType: 'application/json'},
+  // {ext: 'bson', mimeType: 'application/octet-stream'}
 ];
 
 function getExpected() {

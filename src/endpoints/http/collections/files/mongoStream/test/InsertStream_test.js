@@ -2,7 +2,7 @@ import assert from 'assert';
 import sinon from 'sinon';
 import fs from 'fs';
 import stream from 'stream';
-import { InsertStream } from  '../index';
+import { InsertStream } from  '../';
 
 
 /*comment this */
@@ -27,6 +27,7 @@ function getOption(opts) {
     insertSpy: insertSpy,
     insertManySpy: insertManySpy,
     highWaterMark: opts.highWaterMark,
+    collectionName: 'test-collection',
     db: {
       collection: function() {
         return {
@@ -46,7 +47,7 @@ function getOption(opts) {
 
 function createTestStream(highWaterMark, cb) {
   const option = getOption({highWaterMark: highWaterMark});
-  fs.createReadStream(`${__dirname}/import.json`, {encoding: 'utf8'})
+  fs.createReadStream(`${__dirname}/data.json`, {encoding: 'utf8'})
   .pipe(new TransformToObject())
   .pipe(new InsertStream(option))
   .on('finish', () => cb(option));
