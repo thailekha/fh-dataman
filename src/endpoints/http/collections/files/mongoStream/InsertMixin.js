@@ -8,7 +8,7 @@ var defaultOptions = {
 };
 
 function insert(data, fn, cb) {
-  this.db.collection('members')[fn](data, cb);
+  this.db.collection(this.collectionName)[fn](data, cb);
 }
 
 /**
@@ -17,8 +17,8 @@ function insert(data, fn, cb) {
 var InsertMixin = Base => class extends Base {
 
   constructor(options={}) {
-    if (!options.db) {
-      throw new Error('Can not initialise without db option');
+    if (!options.db || !options.collectionName) {
+      throw new Error('Can not initialise without db or collectionName option');
     }
 
     const opts = Object.assign(defaultOptions, options);
@@ -27,6 +27,7 @@ var InsertMixin = Base => class extends Base {
     super(opts);
 
     this.db = options.db;
+    this.collectionName = options.collectionName;
   }
 
   _write(obj, encoding, cb) {

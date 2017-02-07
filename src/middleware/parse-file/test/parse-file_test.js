@@ -8,9 +8,9 @@ const parseFile = proxyquire('../', {
 });
 
 const parserInfo = [
-  {ext: 'csv', mimeType: 'text/csv'},
-  {ext: 'json', mimeType: 'application/json'},
-  {ext: 'bson', mimeType: 'application/octet-stream'}
+  {ext: 'csv', mimeType: 'text/csv'}//,
+  // {ext: 'json', mimeType: 'application/json'},
+  // {ext: 'bson', mimeType: 'application/octet-stream'}
 ];
 
 function getExpected() {
@@ -35,7 +35,7 @@ function getExpected() {
   ];
 }
 
-export function testFileBeingPutOnRequest(done) {
+export function testFileOnRequest(done) {
   const mockRes = {};
   const mockReq = {
     headers: {},
@@ -46,13 +46,18 @@ export function testFileBeingPutOnRequest(done) {
   const middleware = parseFile.default();
 
   middleware(mockReq, mockRes, err => {
-    assert.ok(mockReq.file);
     assert.ok(!err);
+
+    assert.ok(mockReq.file);
+    assert.ok(mockReq.file.meta);
+    assert.equal(mockReq.file.meta.fileName, 'import.json');
+    assert.equal(mockReq.file.meta.encoding, '7bit');
+    assert.equal(mockReq.file.meta.mimetype, 'application/json');
     done();
   });
 }
 
-export function testBusboyError(done) {
+export function testError(done) {
   const mockRes = {};
   const mockReq = {
     headers: {},

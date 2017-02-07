@@ -5,7 +5,7 @@ var MongoClient = require('mongodb').MongoClient;
   /**
    * @param {object} options
    */
-export default () => {
+export default (/*options={}*/) => {
 
   /**
    * Middleware to establish the database connection for a given app.

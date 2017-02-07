@@ -19,21 +19,8 @@ class csvIdTransform extends stream.Transform {
   }
 }
 
-function getParserChain(mimeType) {
-  return {
-    'application/json': [mongoExtendedJSON.createParseStream('*')],
-    'text/csv': [csvParse({}, {objectMode:true}), new csvIdTransform()],
-    'application/octet-stream': [new bsonParse()]
-  }[mimeType];
-}
-
 export default {
-  set: (file, mimeType) => {
-    const parserChain = getParserChain(mimeType);
-    if (!parserChain) {
-      return null;
-    }
-
-    return parserChain.reduce((file, parser) => file.pipe(parser), file);
-  }
+  'application/json': [mongoExtendedJSON.createParseStream('*')],
+  'text/csv': [csvParse({}, {objectMode:true}), new csvIdTransform()],
+  'application/octet-stream': [new bsonParse()]
 };

@@ -3,6 +3,15 @@ import parsers from './parsers';
 
 const  UNSUPPORTED_MEDIA = 415;
 
+function setParsers(file, mimeType) {
+  const parserChain = parsers[mimeType];
+  if (!parserChain) {
+    return null;
+  }
+
+  return parserChain.reduce((file, parser) => file.pipe(parser), file);
+}
+
 /**
  * @TODO: docs
  */
@@ -18,13 +27,14 @@ export default function() {
       return next(err);
     }
 
-    busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-      if (!filename) {
+    busboy.on('file', function(fieldname, file, fileName, encoding, mimetype) {
+      if (!fileName) {
         // Must always handle filestream even if no underlying file resource actually exists.
         return file.resume();
       }
 
-      req.file = parsers.set(file, mimetype) || file;
+      req.file = setParsers(file, mimetype) || file;
+      req.file.meta = {fileName, encoding, mimetype};
 
       next(null);
     });
