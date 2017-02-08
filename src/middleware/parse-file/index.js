@@ -4,7 +4,7 @@ import parsers from './parsers';
 const  UNSUPPORTED_MEDIA = 415;
 
 function setParsers(file, mimeType) {
-  const parserChain = parsers[mimeType];
+  const parserChain = typeof parsers[mimeType] === 'function' && parsers[mimeType]();
   if (!parserChain) {
     return null;
   }

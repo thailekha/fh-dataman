@@ -1,12 +1,14 @@
 import listCollections from './list';
 import createCollection from './create';
 import deleteCollections from './delete';
-import {uploadCollection, getCollectionName} from './files';
+import {insertCollection, getCollectionName} from './files';
 import parseFile from '../../../middleware/parse-file';
 
 const CREATED = 201;
 const BAD_REQUEST = 400;
 const SUCCESS = 400;
+const CONFLICT = 409;
+const DUPLICATE_ID = 11000;
 
 export function collectionsHandler(router) {
   //list collection info
@@ -65,13 +67,20 @@ export function collectionsHandler(router) {
     const collectionName = getCollectionName(req.file.meta.fileName);
     req.log.debug({collectionName}, 'Starting collection upload');
 
-    uploadCollection(req.file, collectionName, req.db)
+    insertCollection(req.file, collectionName, req.db)
       .then(() => {
         req.log.trace({collectionName}, 'Collection upload completed');
         res.status(CREATED).end();
       })
       .catch(err => {
-        deleteCollections(req.params.appname, req.log, req.db, [collectionName]);
+        if (err.code !== CONFLICT) {
+          deleteCollections(req.params.appname, req.log, req.db, [collectionName]);
+        }
+
+        if (err.code === DUPLICATE_ID) {
+          err.code = CONFLICT;
+        }
+
         next(err);
       });
   });

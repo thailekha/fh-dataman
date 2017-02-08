@@ -8,7 +8,13 @@ var defaultOptions = {
 };
 
 function insert(data, fn, cb) {
-  this.db.collection(this.collectionName)[fn](data, cb);
+  this.db.collection(this.collectionName, function(err, collection) {
+    if (err) {
+      return this.emit('error', err);
+    }
+
+    collection[fn](data, cb);
+  }.bind(this));
 }
 
 /**

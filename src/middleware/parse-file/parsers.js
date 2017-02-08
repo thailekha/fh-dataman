@@ -20,7 +20,7 @@ class csvIdTransform extends stream.Transform {
 }
 
 export default {
-  'application/json': [mongoExtendedJSON.createParseStream('*')],
-  'text/csv': [csvParse({}, {objectMode:true}), new csvIdTransform()],
-  'application/octet-stream': [new bsonParse()]
+  'application/json': () => [mongoExtendedJSON.createParseStream('*')],
+  'text/csv': () => [csvParse({}, {objectMode:true}), new csvIdTransform()],
+  'application/octet-stream': () => [new bsonParse()]
 };

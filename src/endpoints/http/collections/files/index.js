@@ -1,4 +1,6 @@
-import { InsertStream } from './mongoStream';
+import * as storage from './mongoStream';
+
+const CONFLICT = 409;
 
 export function getCollectionName(fileName) {
   const collectionName = fileName.split('.');
@@ -6,18 +8,22 @@ export function getCollectionName(fileName) {
   return collectionName.join('.');
 }
 
+function collectionExists(collections, name) {
+  return collections.some(collection => collection.name === name);
+}
+
 /**
  * TODO: docs
  */
-export function uploadCollection(file, collectionName, db) {
+export function insertCollection(file, name, db) {
 
   return new Promise((resolve, reject) => {
-    const insertStream = new InsertStream({db: db, collectionName});
+    const insertStream = new storage.InsertStream({db: db, collectionName: name});
 
     db.listCollections()
       .toArray((err, collections) => {
-        if (err || collections.indexOf(collectionName) > -1) {
-          return reject(err || new Error(`${collectionName} already exists`));
+        if (err || collectionExists(collections, name)) {
+          return reject(err || {message: `Collection ${name} already exists`, code: CONFLICT});
         }
 
         file

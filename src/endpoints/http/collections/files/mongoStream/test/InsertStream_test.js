@@ -23,23 +23,25 @@ class TransformToObject extends stream.Transform {
 function getOption(opts) {
   const insertSpy = sinon.spy();
   const insertManySpy = sinon.spy();
+  const collection = {
+    insert(data, cb) {
+      insertSpy(data);
+      cb();
+    },
+    insertMany(data, cb) {
+      insertManySpy(data);
+      cb();
+    }
+  };
+
   return {
     insertSpy: insertSpy,
     insertManySpy: insertManySpy,
     highWaterMark: opts.highWaterMark,
     collectionName: 'test-collection',
     db: {
-      collection: function() {
-        return {
-          insert(data,cb) {
-            insertSpy(data);
-            cb();
-          },
-          insertMany(data,cb) {
-            insertManySpy(data);
-            cb();
-          }
-        };
+      collection: function(name, cb) {
+        cb(null, collection);
       }
     }
   };
