@@ -41,36 +41,61 @@ function getOption(opts) {
     collectionName: 'test-collection',
     db: {
       collection: function(name, cb) {
-        cb(null, collection);
+        cb(opts.err, collection);
       }
     }
   };
 }
 
-function createTestStream(highWaterMark, cb) {
-  const option = getOption({highWaterMark: highWaterMark});
-  fs.createReadStream(`${__dirname}/data.json`, {encoding: 'utf8'})
+function createTestStream(highWaterMark, err, cb) {
+  const option = getOption({highWaterMark, err});
+  const stream = fs.createReadStream(`${__dirname}/data.json`, {encoding: 'utf8'})
   .pipe(new TransformToObject())
-  .pipe(new InsertStream(option))
-  .on('finish', () => cb(option));
+  .pipe(new InsertStream(option));
+
+  cb(stream, option);
 }
 
 export function testSingleWrite(done) {
 
-  createTestStream(1, option => {
-    assert.ok(option.insertSpy.calledThrice);
-    assert.ok(option.insertManySpy.notCalled);
-    done();
+  createTestStream(1, null, (stream, option) => {
+    stream.on('finish', () => {
+      assert.ok(option.insertSpy.calledThrice);
+      assert.ok(option.insertManySpy.notCalled);
+      done();
+    });
   });
 
 }
 
 export function testBatchWrite(done) {
 
-  createTestStream(2, option => {
-    assert.ok(option.insertSpy.calledOnce);
-    assert.ok(option.insertManySpy.calledOnce);
-    assert.equal(option.insertManySpy.getCall(0).args[0].length, 2);
+  createTestStream(2, null, (stream, option) => {
+    stream.on('finish', () => {
+      assert.ok(option.insertSpy.calledOnce);
+      assert.ok(option.insertManySpy.calledOnce);
+      assert.equal(option.insertManySpy.getCall(0).args[0].length, 2);
+      done();
+    });
+  });
+
+}
+
+export function testError(done) {
+
+  createTestStream(1, {}, stream => {
+    stream.on('error', () => {
+      assert.ok(true);
+      done();
+    });
+  });
+
+}
+
+export function testMaxWrite(done) {
+
+  createTestStream(2000, null, stream => {
+    assert.ok(stream._writableState.highWaterMark === 1000);
     done();
   });
 
