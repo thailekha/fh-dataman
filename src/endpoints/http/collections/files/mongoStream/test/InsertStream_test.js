@@ -4,6 +4,7 @@ import fs from 'fs';
 import stream from 'stream';
 import { InsertStream } from  '../';
 
+const MAX_MONGO_WRITE = 1000;
 
 /*comment this */
 class TransformToObject extends stream.Transform {
@@ -96,9 +97,9 @@ export function testError(done) {
 }
 
 export function testMaxWrite(done) {
-
-  createTestStream(2000, null, stream => {
-    assert.ok(stream._writableState.highWaterMark === 1000);
+  const invalidHighWaterMark = MAX_MONGO_WRITE + 1;
+  createTestStream(invalidHighWaterMark, null, stream => {
+    assert.ok(stream._writableState.highWaterMark === MAX_MONGO_WRITE);
     done();
   });
 
