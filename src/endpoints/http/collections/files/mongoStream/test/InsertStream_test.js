@@ -20,7 +20,7 @@ class TransformToObject extends stream.Transform {
   }
 }
 
-function getOption(opts) {
+function getSpies() {
   const insertSpy = sinon.spy();
   const insertManySpy = sinon.spy();
   const collection = {
@@ -34,34 +34,37 @@ function getOption(opts) {
     }
   };
 
+  return [insertSpy, insertManySpy, collection];
+}
+
+function getOption(opts) {
   return {
-    insertSpy: insertSpy,
-    insertManySpy: insertManySpy,
     highWaterMark: opts.highWaterMark,
     collectionName: 'test-collection',
     db: {
       collection: function(name, cb) {
-        cb(opts.err, collection);
+        cb(opts.err, opts.collection);
       }
     }
   };
 }
 
 function createTestStream(highWaterMark, err, cb) {
-  const option = getOption({highWaterMark, err});
+  const [insertSpy, insertManySpy, collection] = getSpies();
+  const option = getOption({highWaterMark, collection, err});
   const stream = fs.createReadStream(`${__dirname}/data.json`, {encoding: 'utf8'})
   .pipe(new TransformToObject())
   .pipe(new InsertStream(option));
 
-  cb(stream, option);
+  cb(stream, {insertSpy, insertManySpy});
 }
 
 export function testSingleWrite(done) {
 
-  createTestStream(1, null, (stream, option) => {
+  createTestStream(1, null, (stream, spies) => {
     stream.on('finish', () => {
-      assert.ok(option.insertSpy.calledThrice);
-      assert.ok(option.insertManySpy.notCalled);
+      assert.ok(spies.insertSpy.calledThrice);
+      assert.ok(spies.insertManySpy.notCalled);
       done();
     });
   });
@@ -70,11 +73,11 @@ export function testSingleWrite(done) {
 
 export function testBatchWrite(done) {
 
-  createTestStream(2, null, (stream, option) => {
+  createTestStream(2, null, (stream, spies) => {
     stream.on('finish', () => {
-      assert.ok(option.insertSpy.calledOnce);
-      assert.ok(option.insertManySpy.calledOnce);
-      assert.equal(option.insertManySpy.getCall(0).args[0].length, 2);
+      assert.ok(spies.insertSpy.calledOnce);
+      assert.ok(spies.insertManySpy.calledOnce);
+      assert.equal(spies.insertManySpy.getCall(0).args[0].length, 2);
       done();
     });
   });
