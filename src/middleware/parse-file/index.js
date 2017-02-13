@@ -3,6 +3,14 @@ import parsers from './parsers';
 
 const  UNSUPPORTED_MEDIA = 415;
 
+/**
+ * Set stream parser chain on the uploaded file stream.
+ *
+ * @param {object} file - FileReadStream.
+ * @param {string} mimetype - Attach parser chain based on the file mime type
+ *
+ * @returns {object} - A WriteStream that will stream the file data in the correct parsed format.
+ */
 function setParsers(file, mimeType) {
   const parserChain = typeof parsers[mimeType] === 'function' && parsers[mimeType]();
   if (!parserChain) {
@@ -16,7 +24,6 @@ function setParsers(file, mimeType) {
  * Middleware to parse incoming form file data.
  * parse-file will attach a stream parser chain to the file to present the data in the required format.
  * Parsers will be retrieved from parsers.js and will be mapped based on the mime type of the incoming file.
- *
  */
 export default function() {
 

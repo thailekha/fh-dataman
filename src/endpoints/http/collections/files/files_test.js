@@ -6,7 +6,6 @@ import stream from 'stream';
 const CONFLICT = 409;
 
 class MockStream extends stream.Transform {
-
   _write(data, encoding, cb) {
     data = JSON.parse(data.toString());
     if (data.error) {
@@ -15,7 +14,6 @@ class MockStream extends stream.Transform {
 
     cb();
   }
-
 }
 const files = proxyquire('./', {
   './mongoStream': {InsertStream: MockStream}

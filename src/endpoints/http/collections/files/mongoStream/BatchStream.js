@@ -12,7 +12,6 @@ var defaultOptions = {
  * A standard objectMode stream will call _write for each object in the stream.
  * Batchstream will call _write or _writev when the buffer is full.
  * Batch size is controlled by the highWatermark option.
- *
  */
 class BatchStream extends stream.Writable {
   constructor(options={}) {
