@@ -1,11 +1,10 @@
 import fhMbaasClient from 'fh-mbaas-client';
 import fhdb from 'fh-db';
-// var MongoClient = require('mongodb').MongoClient;
 
   /**
    * @param {object} options
    */
-export default (options={}) => {
+export default options => {
 
   /**
    * Middleware to establish the database connection for a given app.
@@ -42,10 +41,6 @@ export default (options={}) => {
         req.db.close();
       }
     });
-    // MongoClient.connect('mongodb://admin:admin@localhost/admin', function(err, db) {
-    //   req.db = db;
-    //   next(err);
-    // });
   }
   return middleware;
 };

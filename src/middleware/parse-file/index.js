@@ -13,7 +13,10 @@ function setParsers(file, mimeType) {
 }
 
 /**
- * @TODO: docs
+ * Middleware to parse incoming form file data.
+ * parse-file will attach a stream parser chain to the file to present the data in the required format.
+ * Parsers will be retrieved from parsers.js and will be mapped based on the mime type of the incoming file.
+ *
  */
 export default function() {
 

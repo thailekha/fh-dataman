@@ -4,9 +4,9 @@ import fs from 'fs';
 import stream from 'stream';
 import { InsertStream } from  '../';
 
-const MAX_MONGO_WRITE = 1000;
-
-/*comment this */
+/**
+ * Transform class to turn our string JSON data into objects.
+ */
 class TransformToObject extends stream.Transform {
   constructor() {
     super({objectMode:true});
@@ -61,7 +61,6 @@ function createTestStream(highWaterMark, err, cb) {
 }
 
 export function testSingleWrite(done) {
-
   createTestStream(1, null, (stream, spies) => {
     stream.on('finish', () => {
       assert.ok(spies.insertSpy.calledThrice);
@@ -69,11 +68,9 @@ export function testSingleWrite(done) {
       done();
     });
   });
-
 }
 
 export function testBatchWrite(done) {
-
   createTestStream(2, null, (stream, spies) => {
     stream.on('finish', () => {
       assert.ok(spies.insertSpy.calledOnce);
@@ -82,25 +79,13 @@ export function testBatchWrite(done) {
       done();
     });
   });
-
 }
 
 export function testError(done) {
-
   createTestStream(1, {}, stream => {
     stream.on('error', () => {
       assert.ok(true);
       done();
     });
   });
-
-}
-
-export function testMaxWrite(done) {
-  const invalidHighWaterMark = MAX_MONGO_WRITE + 1;
-  createTestStream(invalidHighWaterMark, null, stream => {
-    assert.ok(stream._writableState.highWaterMark === MAX_MONGO_WRITE);
-    done();
-  });
-
 }

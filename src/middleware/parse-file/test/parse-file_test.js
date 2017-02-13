@@ -8,25 +8,28 @@ const parseFile = proxyquire('../', {
 });
 
 const parserInfo = [
-  {ext: 'csv', mimeType: 'text/csv'}//,
-  // {ext: 'json', mimeType: 'application/json'},
-  // {ext: 'bson', mimeType: 'application/octet-stream'}
+  {ext: 'csv', mimeType: 'text/csv'},
+  {ext: 'json', mimeType: 'application/json'},
+  {ext: 'bson', mimeType: 'application/octet-stream'}
 ];
 
 function getExpected() {
   return [
-    { //_id: '589362430afa40f203d93cf8',
+    {
+      _id: '589362430afa40f203d93cf8',
       name: '1',
       age: 19,
       status: 'P',
       likes: [ 'golf', 'racquetball' ] },
-    { //_id: '5893626b0afa40f203d93cf9',
+    {
+      _id: '5893626b0afa40f203d93cf9',
       name: '2',
       age: 32,
       status: 'P',
       likes: [ 'golf', 'racquetball' ]
     },
-    { //_id: '589362830afa40f203d93cfa',
+    {
+      _id: '589362830afa40f203d93cfa',
       name: '3',
       age: 32,
       status: 'P',
@@ -92,8 +95,15 @@ export function testParsers(done) {
       assert.ok(!err);
 
       mockReq.file.on('data', obj => {
-        delete obj._id;
-        assert.deepEqual(obj, expected.shift());
+        const expectedObj = expected.shift();
+        Object.keys(expectedObj)
+          .forEach(key => {
+            if (key === '_id') {
+              return assert.deepEqual(expectedObj[key].toString(), obj[key].toString());
+            }
+
+            assert.deepEqual(expectedObj[key], obj[key]);
+          });
       }).on('finish', () => {
         if (index < parserInfo.length - 1) {
           return;

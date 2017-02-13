@@ -1,12 +1,11 @@
-import mongoExtendedJSON from 'mongodb-extended-json';
-
-const MAX_MONGO_WRITES = 1000;
-
-var defaultOptions = {
-  objectMode: true,
-  highWaterMark: MAX_MONGO_WRITES
-};
-
+/**
+ * Utility to insert data into the mongodb collection
+ *
+ * @param {object|Array} data - The data object(s).
+ * @param {string} fn - The mongodb collection insert function name
+ * @param {function} cb - The callback function.
+ *
+ */
 function insert(data, fn, cb) {
   this.db.collection(this.collectionName, function(err, collection) {
     if (err) {
@@ -18,7 +17,9 @@ function insert(data, fn, cb) {
 }
 
 /**
- * TODO: docs
+ * Mixin implementing the WriteStream interface.
+ * InsertMixin will insert object(s) into a mongodb collection.
+ *
  */
 var InsertMixin = Base => class extends Base {
 
@@ -27,25 +28,32 @@ var InsertMixin = Base => class extends Base {
       throw new Error('Can not initialise without db or collectionName option');
     }
 
-    const opts = Object.assign(defaultOptions, options);
-    opts.highWaterMark = Math.min(opts.highWaterMark, MAX_MONGO_WRITES);
-
-    super(opts);
-
+    super(options);
     this.db = options.db;
     this.collectionName = options.collectionName;
   }
 
-  _write(obj, encoding, cb) {
-    // // temporary hack until I figure out the mongoExtendedJSON stream error.
-    obj = mongoExtendedJSON.parse(mongoExtendedJSON.stringify(obj));
-
-    insert.call(this, obj, 'insert', cb);
+/**
+ * Insert a single object into the mongodb collection.
+ *
+ * @param {object} data - The data object.
+ * @param {string} encoding - The Buffer encoding. Not used in objectMode.
+ * @param {function} cb - cb to let the stream know the write is finished.
+ *
+ */
+  _write(data, encoding, cb) {
+    insert.call(this, data, 'insert', cb);
   }
 
+/**
+ * Insert an Array of objects into the mongodb collection.
+ *
+ * @param {chunks} Array - List of data objects.
+ * @param {function} cb - cb to let the stream know the write is finished.
+ *
+ */
   _writev(chunks, cb) {
-    // // temporary hack until I figure out the mongoExtendedJSON stream error.
-    const data = chunks.map(bufferObj => mongoExtendedJSON.parse(mongoExtendedJSON.stringify(bufferObj.chunk)));
+    const data = chunks.map(bufferObj => bufferObj.chunk);
     insert.call(this, data, 'insertMany', cb);
   }
 };
