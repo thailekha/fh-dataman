@@ -31,6 +31,7 @@ export default options => {
         connectionUrl: isDedicatedDb ? appEnvVars.FH_MONGODB_CONN_URL : options.FH_MONGODB_CONN_URL
       };
       fhdb.createMongoCompatApi(params).then(db => {
+
         req.log.info({db: db}, 'mongodb connection set');
         req.db = db;
         next();

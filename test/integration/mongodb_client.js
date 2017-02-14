@@ -19,6 +19,7 @@ exports.MONGODBURL = MONGODBURL;
  */
 export function setupDb(cb) {
   MongoClient.connect(MONGO_ADMIN_DB_URL, (err, db) => {
+
     if (err) {
       return cb(err);
     }
@@ -69,3 +70,13 @@ export function createCollectionsWithDocs(collections, cb) {
   });
 }
 
+export function dropCollection(collection, cb) {
+  connectDb((err, db) => {
+    if (err) {
+      return cb(err);
+    }
+
+    var testDb = db.db(MONGO_DB_NAME);
+    testDb.dropCollection(collection).then(() => cb(null, testDb)).catch(err => cb(err));
+  });
+}
