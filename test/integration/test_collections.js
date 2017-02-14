@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+
 chai.use(chaiHttp);
 var expect = chai.expect;
 import * as mongodbClient from './mongodb_client';
@@ -24,6 +26,7 @@ module.exports = {
     'before': function(done) {
       mongodbClient.createCollectionsWithDocs(COLLECTIONS, done);
     },
+
 
     'test_collection_list': function(done) {
       chai.request(SERVER_URL)
@@ -66,6 +69,33 @@ module.exports = {
            expect(res.text).to.equal('test1,test2 collection(s) deleted');
            done();
          });
+    },
+
+    'test_collection_upload': function(done) {
+      const test = (ext, exts) => {
+
+        if (!(ext && exts)) {
+          done();
+        }
+
+        chai.request(SERVER_URL)
+        .post(`${PATH_PREFIX}/collections/upload`)
+        .attach('file', fs.readFileSync(`${__dirname}/fixture/import.${ext}`), `import.${ext}` )
+        .set('Authorization', `Bearer ${TOKEN}`)
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(201);
+
+          mongodbClient.dropCollection('import', err => {
+            expect(err).to.be.null;
+
+            test(exts.shift(), exts);
+          });
+        });
+      };
+
+      const extensions = ['json','csv','bson'];
+      test(extensions.shift(), extensions);
     }
   }
 };

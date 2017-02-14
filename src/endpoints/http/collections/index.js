@@ -6,7 +6,7 @@ import parseFile from '../../../middleware/parse-file';
 
 const CREATED = 201;
 const BAD_REQUEST = 400;
-const SUCCESS = 400;
+const SUCCESS = 200;
 const CONFLICT = 409;
 const DUPLICATE_ID = 11000;
 
@@ -73,6 +73,7 @@ export function collectionsHandler(router) {
         res.status(CREATED).end();
       })
       .catch(err => {
+
         if (err.code !== CONFLICT) {
           deleteCollections(req.params.appname, req.log, req.db, [collectionName]);
         }
