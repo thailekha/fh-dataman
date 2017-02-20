@@ -5,9 +5,6 @@ import bsonParse from 'bson-stream';
 import bson from 'bson';
 import deserialize from 'mongodb-extended-json/lib/deserialize';
 
-/**
- * @TODO: docs
- */
 class csvIdTransform extends stream.Transform {
   constructor() {
     super({objectMode:true});

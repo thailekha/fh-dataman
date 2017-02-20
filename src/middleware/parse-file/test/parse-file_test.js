@@ -10,7 +10,8 @@ const parseFile = proxyquire('../', {
 const parserInfo = [
   {ext: 'csv', mimeType: 'text/csv'},
   {ext: 'json', mimeType: 'application/json'},
-  {ext: 'bson', mimeType: 'application/octet-stream'}
+  {ext: 'bson', mimeType: 'application/octet-stream'},
+  null
 ];
 
 function getExpected() {
@@ -78,7 +79,11 @@ export function testError(done) {
 }
 
 export function testParsers(done) {
-  parserInfo.forEach((parser, index) => {
+  parserInfo.forEach(parser => {
+    if (!parser) {
+      return done();
+    }
+
     const expected = getExpected();
     const mockRes = {};
     const mockReq = {
@@ -98,19 +103,12 @@ export function testParsers(done) {
         Object.keys(expectedObj)
           .forEach(key => {
             if (key === '_id') {
-              return assert.deepEqual(expectedObj[key].toString(), obj[key].toString());
+              return assert.equal(expectedObj[key].toString(), obj[key].toString());
             }
 
             assert.deepEqual(expectedObj[key], obj[key]);
           });
-      }).on('finish', () => {
-        if (index < parserInfo.length - 1) {
-          return;
-        }
-
-        done();
       });
-
     });
   });
 }

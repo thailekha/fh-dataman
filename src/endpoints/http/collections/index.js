@@ -3,11 +3,8 @@ import createCollection from './create';
 import deleteCollections from './delete';
 import {insertCollection, getCollectionName} from './files';
 import parseFile from '../../../middleware/parse-file';
+import statusCodes from '../../statusCodes';
 
-const CREATED = 201;
-const BAD_REQUEST = 400;
-const SUCCESS = 400;
-const CONFLICT = 409;
 const DUPLICATE_ID = 11000;
 
 export function collectionsHandler(router) {
@@ -26,27 +23,27 @@ export function collectionsHandler(router) {
   //create collection
   router.post('/collections', (req, res, next) => {
     if (!req.body.name) {
-      return next({'message': 'name is required', code: BAD_REQUEST});
+      return next({'message': 'name is required', code: statusCodes.BAD_REQUEST});
     }
     const name = req.body.name;
     createCollection(req.param('appname'), req.log, req.db, name)
       .then(() => {
         req.log.trace({name}, 'collection created');
-        return res.status(CREATED).send(name.concat(' collection created'));
+        return res.status(statusCodes.CREATED).send(name.concat(' collection created'));
       }).catch(next);
   });
 
   // Delete collection
   router.delete('/collections/', (req, res, next) => {
     if (!req.query.names) {
-      return next({'message': 'names(s) of collection(s) is required', code: BAD_REQUEST});
+      return next({'message': 'names(s) of collection(s) is required', code: statusCodes.BAD_REQUEST});
     }
 
     const reqCollections = req.query.names.split(',');
     deleteCollections(req.param('appname'), req.log, req.db, reqCollections)
       .then(function(collections) {
         if (!collections.length) {
-          return next({'message': 'collection(s) requested do not exist', code: BAD_REQUEST});
+          return next({'message': 'collection(s) requested do not exist', code: statusCodes.BAD_REQUEST});
         }
 
         const names = collections.map(function(object) {
@@ -54,14 +51,14 @@ export function collectionsHandler(router) {
         });
         const appname = req.param('appname');
         req.log.trace({app: appname, names}, 'collection(s) deleted');
-        return res.status(SUCCESS).send(names.toString().concat(' collection(s) deleted'));
+        return res.status(statusCodes.SUCCESS).send(names.toString().concat(' collection(s) deleted'));
       })
       .catch(next);
   });
 
   router.post('/collections/upload', parseFile(), (req, res, next) => {
     if (!req.file) {
-      return next({message: 'No file', code: BAD_REQUEST});
+      return next({message: 'No file', code: statusCodes.BAD_REQUEST});
     }
 
     const collectionName = getCollectionName(req.file.meta.fileName);
@@ -70,15 +67,15 @@ export function collectionsHandler(router) {
     insertCollection(req.file, collectionName, req.db)
       .then(() => {
         req.log.trace({collectionName}, 'Collection upload completed');
-        res.status(CREATED).end();
+        res.status(statusCodes.CREATED).end();
       })
       .catch(err => {
-        if (err.code !== CONFLICT) {
+        if (err.code !== statusCodes.CONFLICT) {
           deleteCollections(req.params.appname, req.log, req.db, [collectionName]);
         }
 
         if (err.code === DUPLICATE_ID) {
-          err.code = CONFLICT;
+          err.code = statusCodes.CONFLICT;
         }
 
         next(err);

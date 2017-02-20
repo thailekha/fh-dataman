@@ -1,7 +1,6 @@
 import Busboy from 'busboy';
 import parsers from './parsers';
-
-const  UNSUPPORTED_MEDIA = 415;
+import UnsupportedMediaError from './UnsupportedMediaError';
 
 /**
  * Set stream parser chain on the uploaded file stream.
@@ -33,8 +32,7 @@ export default function() {
       // Busboy will throw 'Unsupported content type' and 'Missing Content-Type' errors.
       busboy = new Busboy({ headers: req.headers});
     } catch (err) {
-      err.code = UNSUPPORTED_MEDIA;
-      return next(err);
+      return next(new UnsupportedMediaError());
     }
 
     busboy.on('file', function(fieldname, file, fileName, encoding, mimetype) {

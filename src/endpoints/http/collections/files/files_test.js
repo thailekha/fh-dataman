@@ -2,8 +2,8 @@ import assert from 'assert';
 import proxyquire from 'proxyquire';
 import fs from 'fs';
 import stream from 'stream';
+import statusCodes from '../../../statusCodes';
 
-const CONFLICT = 409;
 
 class MockStream extends stream.Transform {
   _write(data, encoding, cb) {
@@ -70,7 +70,7 @@ export function testInsertDuplicateCollection(done) {
     })
     .catch(err => {
       assert.ok(err);
-      assert.equal(err.code, CONFLICT);
+      assert.equal(err.code, statusCodes.CONFLICT);
       done();
     })
     .catch(done);

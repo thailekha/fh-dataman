@@ -1,6 +1,5 @@
 import * as storage from './mongoStream';
-
-const CONFLICT = 409;
+import statusCodes from '../../../statusCodes';
 
 /**
  * Derive a collection name from a file name.
@@ -45,7 +44,7 @@ export function insertCollection(file, name, db) {
     db.listCollections()
       .toArray((err, collections) => {
         if (err || collectionExists(collections, name)) {
-          return reject(err || {message: `Collection ${name} already exists`, code: CONFLICT});
+          return reject(err || {message: `Collection ${name} already exists`, code: statusCodes.CONFLICT});
         }
 
         file

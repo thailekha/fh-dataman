@@ -1,3 +1,5 @@
+import statusCodes from '../statusCodes';
+
 export default function errorHandler(err, req, res, next) {
   var responseData;
 
@@ -8,7 +10,7 @@ export default function errorHandler(err, req, res, next) {
     // logs "express-jsonschema: Invalid data found"
 
     // Set a bad request http response status
-    res.status(400);
+    res.status(statusCodes.BAD_REQUEST);
 
     // Format the response body
     responseData = {
@@ -30,8 +32,8 @@ export default function errorHandler(err, req, res, next) {
         }
       });
 
-      return res.status(err.code || 500).json(error);
+      return res.status(err.code || statusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
-    return res.status(err.code || 500).json(err);
+    return res.status(err.code || statusCodes.INTERNAL_SERVER_ERROR).json(err);
   }
 }
