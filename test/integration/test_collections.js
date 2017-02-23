@@ -1,6 +1,9 @@
+import async from 'async';
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import statusCodes from '../../src/endpoints/statusCodes.js';
 chai.use(chaiHttp);
 var expect = chai.expect;
 import * as mongodbClient from './mongodb_client';
@@ -31,7 +34,7 @@ module.exports = {
           .set('Authorization', `Bearer ${TOKEN}`)
           .end((err, res) => {
             expect(err).to.be.null;
-            expect(res).to.have.status(200);
+            expect(res).to.have.status(statusCodes.SUCCESS);
             expect(res).to.be.json;
             expect(res.body).to.have.lengthOf(4); //there will be system.users and system.indexes as well
             const col1 = res.body.filter(col => col.name === COLLECTIONS[0].name);
@@ -49,7 +52,7 @@ module.exports = {
           .set('Authorization', `Bearer ${TOKEN}`)
           .end((err, res) => {
             expect(err).to.be.null;
-            expect(res).to.have.status(201);
+            expect(res).to.have.status(statusCodes.CREATED);
             expect(res.text).to.equal('testCreate collection created');
             done();
           });
@@ -62,10 +65,26 @@ module.exports = {
          .set('Authorization', `Bearer ${TOKEN}`)
          .end((err, res) => {
            expect(err).to.be.null;
-           expect(res).to.have.status(200);
+           expect(res).to.have.status(statusCodes.SUCCESS);
            expect(res.text).to.equal('test1,test2 collection(s) deleted');
            done();
          });
+    },
+
+    'test_collection_upload': function(done) {
+      const test = (ext, cb) => {
+        chai.request(SERVER_URL)
+          .post(`${PATH_PREFIX}/collections/upload`)
+          .attach('file', fs.readFileSync(`${__dirname}/fixture/import.${ext}`), `import.${ext}` )
+          .set('Authorization', `Bearer ${TOKEN}`)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(statusCodes.CREATED);
+            mongodbClient.dropCollection('import', cb);
+          });
+      };
+
+      async.eachSeries(['json','csv','bson'],  test, done);
     }
   }
 };

@@ -2,6 +2,7 @@ import errorHandler from "./error.js";
 import sinon from "sinon";
 import assert from "assert";
 import {getLogger} from '../../logger';
+import statusCodes from '../statusCodes';
 
 const logger = getLogger();
 
@@ -16,7 +17,7 @@ export function testValidationError(done) {
   };
   var err = {name: 'JsonSchemaValidation', message: 'validation error'};
   errorHandler(err, req, res, function() {});
-  assert.ok(res.status.calledWith(400));
+  assert.ok(res.status.calledWith(statusCodes.BAD_REQUEST));
   done();
 }
 
@@ -27,9 +28,9 @@ export function testError(done) {
   };
   res.status.returns(res);
   var err = new Error('this is an error');
-  err.code = 501;
+  err.code = statusCodes.NOT_IMPLEMENTED;
   errorHandler(err, req, res, function() {});
-  assert.ok(res.status.calledWith(501));
+  assert.ok(res.status.calledWith(statusCodes.NOT_IMPLEMENTED));
   assert.ok(res.json.calledWithMatch({message: 'this is an error'}));
   done();
 }

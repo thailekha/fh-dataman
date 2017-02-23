@@ -11,6 +11,7 @@ import {getLogger} from '../../../logger';
 import bodyParser from 'body-parser';
 import errorHandler from '../error';
 import sinonStubPromise from 'sinon-stub-promise';
+import statusCodes from '../../statusCodes';
 
 sinonStubPromise(sinon);
 const app = express();
@@ -55,13 +56,13 @@ module.exports = {
     'test list handler': function(done) {
       supertest(app)
         .get('/api/collections')
-        .expect(200)
+        .expect(statusCodes.SUCCESS)
         .end(done);
     },
     'test delete handler': () => {
       supertest(app)
         .delete('/api/names=collection1,collection2')
-        .expect(200)
+        .expect(statusCodes.SUCCESS)
         .then(function(res) {
           assert.equal(res.text, '"collection1,collection2 collection(s) deleted"');
         });
@@ -69,14 +70,14 @@ module.exports = {
     'test delete handler names of collections required': done => {
       supertest(app)
         .delete('/api/collections?')
-        .expect(400)
+        .expect(statusCodes.BAD_REQUEST)
         .end(done);
     },
     'test create handler': () => {
       supertest(app)
         .post('/api/collections')
         .send({name: 'testCollection'})
-        .expect(201)
+        .expect(statusCodes.CREATED)
         .then(function(res) {
           assert.equal(res.text, 'testCollection collection deleted');
         });
@@ -84,7 +85,7 @@ module.exports = {
     'test create handler name required': done => {
       supertest(app)
         .post('/api/collections')
-        .expect(400)
+        .expect(statusCodes.BAD_REQUEST)
         .end(done);
     }
   }

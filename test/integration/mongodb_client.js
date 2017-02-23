@@ -69,3 +69,13 @@ export function createCollectionsWithDocs(collections, cb) {
   });
 }
 
+export function dropCollection(collection, cb) {
+  connectDb((err, db) => {
+    if (err) {
+      return cb(err);
+    }
+
+    var testDb = db.db(MONGO_DB_NAME);
+    testDb.dropCollection(collection).then(() => cb(null, testDb)).catch(err => cb(err));
+  });
+}
