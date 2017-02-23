@@ -19,7 +19,6 @@ exports.MONGODBURL = MONGODBURL;
  */
 export function setupDb(cb) {
   MongoClient.connect(MONGO_ADMIN_DB_URL, (err, db) => {
-
     if (err) {
       return cb(err);
     }
