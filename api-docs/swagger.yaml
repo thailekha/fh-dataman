@@ -92,6 +92,43 @@ paths:
           description: Application error
           schema:
             $ref: '#/definitions/ErrorResponse'
+  '/{domain}/{envId}/{appGuid}/data/collections/upload':
+    parameters:
+      - $ref: "#/parameters/domain"
+      - $ref: "#/parameters/envId"
+      - $ref: "#/parameters/appGuid"
+    post:
+      summary: Upload collection(s)
+      description: |
+        Upload json, bson, or csv file collection(s)
+      operationId: insertCollection
+      parameters:
+        - in: formData
+          type: file
+          name: file
+          description: The file to be uploaded
+          required: true
+      consumes:
+        - application/json
+        - application/octet-stream
+        - text/csv
+      tags:
+        - Collections
+      responses:
+        '201':
+          description: Successful collection uploaded
+        '400':
+          description: No file submitted
+          schema:
+            $ref: '#/definitions/BadRequestResponse'
+        '409':
+          description: Duplicate collection or document ID
+          schema:
+            $ref: '#/definitions/ConflictResponse'
+        '500':
+          description: Application error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
 parameters:
   domain:
     name: domain
@@ -123,12 +160,14 @@ definitions:
       message:
         type: string
   CreationSuccessResponse:
-    $ref: '#/definitions/GeneralMessage'
+    type: string
   DeletionSuccessResponse:
-    $ref: '#/definitions/GeneralMessage'
+    type: string
   BadRequestResponse:
     $ref: '#/definitions/GeneralMessage'
   ErrorResponse:
+    $ref: '#/definitions/GeneralMessage'
+  ConflictResponse:
     $ref: '#/definitions/GeneralMessage'
   CollectionInfo:
     type: object
