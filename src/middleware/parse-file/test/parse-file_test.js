@@ -1,10 +1,11 @@
 import assert from 'assert';
 import EventEmitter from 'events';
-import proxyquire from 'proxyquire';
 import fs from 'fs';
 
+const proxyquire = require('proxyquire').noCallThru();
+
 const parseFile = proxyquire('../', {
-  'busboy': EventEmitter
+  './BusboyZip': EventEmitter
 });
 
 const parserInfo = [
@@ -43,8 +44,9 @@ export function testFileOnRequest(done) {
   const mockRes = {};
   const mockReq = {
     headers: {},
-    pipe: function(busboy) {
-      busboy.emit('file', 'test', fs.createReadStream('./fixture/import.json'), 'import.json', '7bit', 'application/json');
+    pipe: function(busboyZip) {
+      busboyZip.emit('file', 'test', fs.createReadStream(`${__dirname}/fixture/import.json`), 'import.json', '7bit', 'application/json');
+      process.nextTick(() => busboyZip.emit('finish'));
     }
   };
   const middleware = parseFile.default();
@@ -52,11 +54,12 @@ export function testFileOnRequest(done) {
   middleware(mockReq, mockRes, err => {
     assert.ok(!err);
 
-    assert.ok(mockReq.file);
-    assert.ok(mockReq.file.meta);
-    assert.equal(mockReq.file.meta.fileName, 'import.json');
-    assert.equal(mockReq.file.meta.encoding, '7bit');
-    assert.equal(mockReq.file.meta.mimetype, 'application/json');
+    const file = mockReq.files[0];
+    assert.ok(file);
+    assert.ok(file.meta);
+    assert.equal(file.meta.fileName, 'import.json');
+    assert.equal(file.meta.encoding, '7bit');
+    assert.equal(file.meta.mimetype, 'application/json');
     done();
   });
 }
@@ -65,14 +68,14 @@ export function testError(done) {
   const mockRes = {};
   const mockReq = {
     headers: {},
-    pipe: function(busboy) {
-      busboy.emit('error', new Error('test error'));
+    pipe: function(busboyZip) {
+      busboyZip.emit('error', new Error('test error'));
     }
   };
   const middleware = parseFile.default();
 
   middleware(mockReq, mockRes, err => {
-    assert.ok(!mockReq.file);
+    assert.ok(!mockReq.files[0]);
     assert.equal(err.message,'test error');
     done();
   });
@@ -88,8 +91,8 @@ export function testParsers(done) {
     const mockRes = {};
     const mockReq = {
       headers: {},
-      pipe: function(busboy) {
-        busboy.emit('file', 'test', fs.createReadStream(`${__dirname}/fixture/import.${parser.ext}`), `import.${parser.ext}`, '7bit', parser.mimeType);
+      pipe: function(busboyZip) {
+        busboyZip.emit('file', 'test', fs.createReadStream(`${__dirname}/fixture/import.${parser.ext}`), `import.${parser.ext}`, '7bit', parser.mimeType);
       }
     };
 
@@ -98,7 +101,7 @@ export function testParsers(done) {
     middleware(mockReq, mockRes, err => {
       assert.ok(!err);
 
-      mockReq.file.on('data', obj => {
+      mockReq.files[0].on('data', obj => {
         const expectedObj = expected.shift();
         Object.keys(expectedObj)
           .forEach(key => {

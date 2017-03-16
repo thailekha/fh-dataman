@@ -1,4 +1,4 @@
-import Busboy from 'busboy';
+import BusboyZip from './BusboyZip';
 import parsers from './parsers';
 import UnsupportedMediaError from './UnsupportedMediaError';
 
@@ -7,16 +7,18 @@ import UnsupportedMediaError from './UnsupportedMediaError';
  *
  * @param {object} file - FileReadStream.
  * @param {string} mimetype - Attach parser chain based on the file mime type
- *
+ *TODOO: update docs for meta
  * @returns {object} - A WriteStream that will stream the file data in the correct parsed format.
  */
-function setParsers(file, mimeType) {
-  const parserChain = typeof parsers[mimeType] === 'function' && parsers[mimeType]();
+function setParsers(file, mimetype) {
+  const parserChain = typeof parsers[mimetype] === 'function' && parsers[mimetype]();
+
   if (!parserChain) {
     return null;
   }
 
-  return parserChain.reduce((file, parser) => file.pipe(parser), file);
+  file = parserChain.reduce((file, parser) => file.pipe(parser), file);
+  return file;
 }
 
 /**
@@ -27,30 +29,32 @@ function setParsers(file, mimeType) {
 export default function() {
 
   return (req, res, next) => {
-    let busboy;
+    let busboyZip;
     try {
-      // Busboy will throw 'Unsupported content type' and 'Missing Content-Type' errors.
-      busboy = new Busboy({ headers: req.headers});
+      // BusboyZip will throw 'Unsupported content type' and 'Missing Content-Type' errors.
+      busboyZip = new BusboyZip({ headers: req.headers });
     } catch (err) {
       return next(new UnsupportedMediaError());
     }
 
-    busboy.on('file', function(fieldname, file, fileName, encoding, mimetype) {
+    req.files = [];
+
+    busboyZip.on('file', function(fieldname, file, fileName, encoding, mimetype) {
+
       if (!fileName) {
         // Must always handle filestream even if no underlying file resource actually exists.
         return file.resume();
       }
 
-      req.file = setParsers(file, mimetype) || file;
-      req.file.meta = {fileName, encoding, mimetype};
-
-      next(null);
+      file = setParsers(file, mimetype) || file;
+      file.meta = {fileName, encoding, mimetype};
+      req.files.push(file);
     });
 
-    busboy.on('error', next);
+    busboyZip.on('finish', next);
+    busboyZip.on('error', next);
 
-    req.pipe(busboy);
-
+    req.pipe(busboyZip);
   };
 
 }

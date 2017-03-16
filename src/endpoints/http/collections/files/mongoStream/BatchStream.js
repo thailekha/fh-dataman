@@ -1,4 +1,5 @@
 import stream from 'stream';
+import BatchStreamReceivedBufferError from './BatchStreamReceivedBufferError';
 
 const DEFAULT_BATCH_SIZE = 1000;
 var defaultOptions = {
@@ -23,6 +24,10 @@ class BatchStream extends stream.Writable {
   }
 
   write(chunk, encoding, callback) {
+    if (chunk instanceof Buffer) {
+      this.emit('error', new BatchStreamReceivedBufferError());
+    }
+
     const hasBufferSpace = super.write(chunk, encoding, callback);
     if (!hasBufferSpace) {
       process.nextTick(this.uncork.bind(this));

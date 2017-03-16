@@ -53,6 +53,7 @@ export function testInsertError(done) {
       done();
     })
     .catch(err => {
+      console.log(err);
       assert.ok(err);
       assert.equal(err.message, 'test-error');
       done();

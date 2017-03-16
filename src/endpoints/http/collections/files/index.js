@@ -49,8 +49,12 @@ export function insertCollection(file, name, db) {
 
         file
           .pipe(insert)
-          .on('finish', resolve)
-          .on('error', reject);
+          .on('finish', () => resolve(name))
+          .on('error', err => reject({code: err.code, fileName: file.meta.fileName}));
       });
   });
+}
+
+export function insertCollections(files, db) {
+  return Promise.all(files.map(file => insertCollection(file, getCollectionName(file.meta.fileName), db)));
 }

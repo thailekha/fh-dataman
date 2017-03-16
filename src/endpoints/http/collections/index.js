@@ -1,12 +1,13 @@
 import listCollections from './list';
 import createCollection from './create';
 import deleteCollections from './delete';
-import {insertCollection, getCollectionName} from './files';
+import {insertCollections, getCollectionName} from './files';
 import parseFile from '../../../middleware/parse-file';
 import statusCodes from '../../statusCodes';
 import authorize from '../../../middleware/route-authorize';
 
 const DUPLICATE_DOCUMENT_ID = 11000;
+const BATCHSTREAM_RECEIVED_BUFFER = 22000;
 
 export function collectionsHandler(router) {
   //list collection info
@@ -58,21 +59,25 @@ export function collectionsHandler(router) {
 
   // Upload collections from files
   router.post('/collections/upload', parseFile(), authorize({permission: 'write'}), (req, res, next) => {
-    if (!req.file) {
+    if (!req.files.length) {
       return next({message: 'No file', code: statusCodes.BAD_REQUEST});
     }
 
-    const collectionName = getCollectionName(req.file.meta.fileName);
-    req.log.debug({collectionName}, 'Starting collection upload');
+    req.log.debug(req.files.map(file => getCollectionName(file.meta.fileName)), 'Starting collections upload');
 
-    insertCollection(req.file, collectionName, req.db)
-      .then(() => {
-        req.log.trace({collectionName}, 'Collection upload completed');
+    insertCollections(req.files, req.db)
+      .then(importedCollections => {
+        req.log.trace({importedCollections}, 'Collections upload completed');
         res.status(statusCodes.CREATED).end();
       })
       .catch(err => {
+        if (err.code === BATCHSTREAM_RECEIVED_BUFFER) {
+          err.message = `File ${err.fileName} unsupported`;
+          err.code = statusCodes.UNSUPPORTED_MEDIA;
+        }
+
         if (err.code !== statusCodes.CONFLICT) {
-          deleteCollections(req.params.appGuid, req.log, req.db, [collectionName]);
+          deleteCollections(req.params.appGuid, req.log, req.db, [err.collectionName]);
         }
 
         if (err.code === DUPLICATE_DOCUMENT_ID) {
