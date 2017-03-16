@@ -58,7 +58,7 @@ export function collectionsHandler(router) {
   });
 
   router.post('/collections/upload', parseFile(), authorize({permission: 'write'}), (req, res, next) => {
-    if (!req.file) {
+    if (!req.files.length) {
       return next({message: 'No file', code: statusCodes.BAD_REQUEST});
     }
 
