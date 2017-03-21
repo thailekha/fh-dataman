@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 
     _unit_args: '-u exports -t 10000 --compilers js:babel-core/register',
 
-    unit: ['echo $NODE_PATH', '<%= _test_runner %> <%= _unit_args %> --recursive ./src/**/*_test.js'],
+    unit: ['echo $NODE_PATH', '<%= _test_runner %> <%= _unit_args %> --recursive ./src/**/BusboyZip_test.js'],
 
     // use `grunt fh:testfile:{{unit_test_filename}}` to run a single test file
     unit_single: ['<%= _test_runner %> <%= _unit_args %> <%= unit_test_filename %>'],
