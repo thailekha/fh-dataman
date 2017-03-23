@@ -9,6 +9,7 @@ This service will act as the new backend service for the databrowser in RHMAP st
 ## Table of Contents
 
 - [Build](#Build)
+- [Development] (#Development)
 - [Usage](#usage)
 - [API](#api)
 - [Contribute](#contribute)
@@ -57,6 +58,13 @@ $ docker build -t dataman-mongo ./docker/test/
 $ docker run -d -p 27017:27017 dataman-mongo
 ```
 
+## Development
+To use nodemon livereload run
+
+```
+nodemon --config nodemon.json --exec 'grunt babel && npm start'
+```
+
 ## Usage
 
 To start the service, run
@@ -64,7 +72,6 @@ To start the service, run
 ```bash
 node ./lib/app.js ./config/dev.json
 ```
-
 
 ## API
 To view API docs [start the service](#usage) and navigate to `/docs`.

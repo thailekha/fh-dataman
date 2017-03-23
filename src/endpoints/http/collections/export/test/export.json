@@ -1,0 +1,9 @@
+{
+    "name": "1",
+    "age": 19.0,
+    "status": "P",
+    "likes": [
+        "golf",
+        "racquetball"
+    ]
+}

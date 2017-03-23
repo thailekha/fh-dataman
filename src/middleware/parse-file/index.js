@@ -1,6 +1,6 @@
 import BusboyZip from './lib/BusboyZip';
 import parsers from './lib/parsers';
-import UnsupportedMediaError from './lib/UnsupportedMediaError';
+import UnsupportedMediaError from '../../Errors/UnsupportedMediaError';
 import customMimeTypes from './lib/customMimeTypes';
 import mime from 'mime';
 

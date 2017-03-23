@@ -17,5 +17,6 @@
   "auth": {
     "secret": "secret"
   },
-  "businessObject": "databrowser"
+  "businessObject": "databrowser",
+  "sizeLimit": 524288000
 }

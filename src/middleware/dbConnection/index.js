@@ -1,9 +1,9 @@
 import fhMbaasClient from 'fh-mbaas-client';
 import fhdb from 'fh-db';
 
-  /**
-   * @param {object} options
-   */
+/**
+ * @param {object} options
+ */
 export default options => {
 
   /**
@@ -13,6 +13,7 @@ export default options => {
    * @param {Object} res
    * @param {object} next
    */
+
   function middleware(req, res, next) {
     const client = new fhMbaasClient.MbaasClient(req.envId, options);
     client.admin.apps.envVars.get({ // Get the app's environment variables by calling on fh-mbaas-client
