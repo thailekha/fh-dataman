@@ -1,5 +1,5 @@
-import BatchStream from './BatchStream';
-import InsertMixin from './InsertMixin';
+import BatchStream from './lib/BatchStream';
+import InsertMixin from './lib/InsertMixin';
 
 class InsertStream extends InsertMixin(BatchStream) {}
 

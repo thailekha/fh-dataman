@@ -33,5 +33,5 @@ class ExtendedJSON extends stream.Transform {
 export default {
   'application/json': () => [json.parse(), new ExtendedJSON()],
   'text/csv': () => [csvParse({checkType: true}, {objectMode:true}), new csvIdTransform()],
-  'application/octet-stream': () => [new bsonParse()]
+  'application/bson': () => [new bsonParse()]
 };

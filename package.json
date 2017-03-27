@@ -39,6 +39,7 @@
     "bson-stream": "0.0.8",
     "busboy": "^0.2.14",
     "compression": "1.6.2",
+    "concat-stream": "^1.6.0",
     "cookie-parser": "1.4.3",
     "cors": "2.8.1",
     "csvtojson": "^1.1.2",
@@ -51,10 +52,12 @@
     "fh-mbaas-client": "0.16.4",
     "jsonwebtoken": "7.2.1",
     "lodash": "4.17.2",
+    "mime": "^1.3.4",
     "mongodb-extended-json": "1.7.0",
     "mongoose": "4.5.1",
     "optimist": "0.6.1",
-    "request": "2.79.0"
+    "request": "2.79.0",
+    "yauzl": "^2.7.0"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
