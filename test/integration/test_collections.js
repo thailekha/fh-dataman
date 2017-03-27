@@ -4,6 +4,7 @@ import fs from 'fs';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import statusCodes from '../../src/endpoints/statusCodes.js';
+import fhconfig from 'fh-config';
 chai.use(chaiHttp);
 var expect = chai.expect;
 import * as mongodbClient from './mongodb_client';
@@ -11,11 +12,8 @@ var testConf = require('./test_conf.json');
 
 const SERVER_URL = `http://localhost:${testConf.port}`;
 const PATH_PREFIX = '/api/testing/dev/testappguid/data';
-const payload = {
-  email: 'test@email.com',
-  username: 'user101'
-};
-const TOKEN = jwt.sign(payload, testConf.auth.secret);
+
+var TOKEN = null;
 
 const COLLECTIONS = [
   {name: 'test1', docs: [{field1: 'field1', field2:'field2'}]},
@@ -25,7 +23,28 @@ const COLLECTIONS = [
 module.exports = {
   'test_collections': {
     'before': function(done) {
-      mongodbClient.createCollectionsWithDocs(COLLECTIONS, done);
+      fhconfig.init('config/dev.json', () => {
+        const payload = {
+          entity: {
+            guid: 'testappguid',
+            email: "test@email.com",
+            username: "user101",
+            domain: "testing",
+            sub: "1234subdomain"
+          },
+          permissions: [{
+            businessObject: fhconfig.value('businessObject'),
+            permissions: {
+              write: true,
+              read: true
+            }
+          }]
+        };
+
+        TOKEN = jwt.sign(payload, testConf.auth.secret);
+
+        mongodbClient.createCollectionsWithDocs(COLLECTIONS, done);
+      });
     },
 
     'test_collection_list': function(done) {
@@ -84,7 +103,7 @@ module.exports = {
           });
       };
 
-      async.eachSeries(['json','csv','bson'],  test, done);
+      async.eachSeries(['json', 'csv', 'bson'],  test, done);
     }
   }
 };

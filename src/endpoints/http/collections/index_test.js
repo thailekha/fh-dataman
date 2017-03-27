@@ -12,11 +12,14 @@ import bodyParser from 'body-parser';
 import errorHandler from '../error';
 import sinonStubPromise from 'sinon-stub-promise';
 import statusCodes from '../../statusCodes';
+import fhconfig from 'fh-config';
 
 sinonStubPromise(sinon);
 const app = express();
-const router = express.Router();
+const router = express.Router({mergeParams:true});
 const logger = getLogger();
+var user = null;
+const appGuid = '123456';
 
 collectionsHandler(router);
 const dropCollecionStub = sinon.stub().returnsPromise();
@@ -26,9 +29,10 @@ app.use((req, res, next) => {
   req.db = {
     dropCollection: dropCollecionStub
   };
+  req.user = user;
   next();
 });
-app.use('/api', router);
+app.use('/api/:appGuid/', router);
 app.use(errorHandler);
 
 module.exports = {
@@ -47,7 +51,18 @@ module.exports = {
         return Promise.resolve(true);
       });
       dropCollecionStub.resolves('collection1,collection2 collection(s) deleted');
-      done();
+      fhconfig.init('config/dev.json', () => {
+        user = {
+          entity: {
+            guid: appGuid
+          },
+          permissions: [{
+            businessObject: fhconfig.value('businessObject'),
+            permissions: {read: true, write: true}
+          }]
+        };
+        done();
+      });
     },
     'after': function(done) {
       sinon.restore();
@@ -55,13 +70,13 @@ module.exports = {
     },
     'test list handler': function(done) {
       supertest(app)
-        .get('/api/collections')
+        .get(`/api/${appGuid}/collections`)
         .expect(statusCodes.SUCCESS)
         .end(done);
     },
     'test delete handler': () => {
       supertest(app)
-        .delete('/api/names=collection1,collection2')
+        .delete(`/api/${appGuid}/collections/names=collection1,collection2`)
         .expect(statusCodes.SUCCESS)
         .then(function(res) {
           assert.equal(res.text, '"collection1,collection2 collection(s) deleted"');
@@ -69,13 +84,13 @@ module.exports = {
     },
     'test delete handler names of collections required': done => {
       supertest(app)
-        .delete('/api/collections?')
+        .delete(`/api/${appGuid}/collections?`)
         .expect(statusCodes.BAD_REQUEST)
         .end(done);
     },
     'test create handler': () => {
       supertest(app)
-        .post('/api/collections')
+        .post(`/api/${appGuid}/collections`)
         .send({name: 'testCollection'})
         .expect(statusCodes.CREATED)
         .then(function(res) {
@@ -84,7 +99,7 @@ module.exports = {
     },
     'test create handler name required': done => {
       supertest(app)
-        .post('/api/collections')
+        .post(`/api/${appGuid}/collections`)
         .expect(statusCodes.BAD_REQUEST)
         .end(done);
     }
