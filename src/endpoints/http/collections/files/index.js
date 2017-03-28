@@ -70,7 +70,7 @@ export function insertCollection(file, name, db) {
 }
 
 /**
- * Insert all the files contents into the database as collection 'name'.
+ * Insert all the files contents into the database as getCollectionName.
  * file contents are expected to be compatible with mongodb insert interface.
  *
  * @param {Filestream[]} files - Array of ReadStreams to read the file data from.
