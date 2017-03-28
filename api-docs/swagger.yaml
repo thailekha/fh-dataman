@@ -100,8 +100,8 @@ paths:
     post:
       summary: Upload collection(s)
       description: |
-        Upload json, bson, or csv file collection(s)
-      operationId: insertCollection
+        Upload json, bson, csv, or zip file collection(s)
+      operationId: insertCollections
       parameters:
         - in: formData
           type: file
@@ -112,6 +112,7 @@ paths:
         - application/json
         - application/octet-stream
         - text/csv
+        - application/zip
       tags:
         - Collections
       responses:
@@ -125,6 +126,10 @@ paths:
           description: Duplicate collection or document ID
           schema:
             $ref: '#/definitions/ConflictResponse'
+        '415':
+          description: Unsupported media type
+          schema:
+            $ref: '#/definitions/UnsupportedMediaTypeResponse'
         '500':
           description: Application error
           schema:
@@ -168,6 +173,8 @@ definitions:
   ErrorResponse:
     $ref: '#/definitions/GeneralMessage'
   ConflictResponse:
+    $ref: '#/definitions/GeneralMessage'
+  UnsupportedMediaTypeResponse:
     $ref: '#/definitions/GeneralMessage'
   CollectionInfo:
     type: object
