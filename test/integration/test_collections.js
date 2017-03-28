@@ -116,14 +116,20 @@ module.exports = {
             expect(err).to.be.null;
             expect(res).to.have.status(statusCodes.CREATED);
 
-            async.parallel([
-              callback => mongodbClient.dropCollection('collection01',callback),
-              callback => mongodbClient.dropCollection('collection02',callback),
-              callback => mongodbClient.dropCollection('collection03',callback)
-            ],
-            err => {
-              expect(err).to.be.null;
-              cb();
+            mongodbClient.getCollectionNames(collections => {
+              expect(collections).to.include('collection01');
+              expect(collections).to.include('collection02');
+              expect(collections).to.include('collection03');
+
+              async.parallel([
+                callback => mongodbClient.dropCollection('collection01',callback),
+                callback => mongodbClient.dropCollection('collection02',callback),
+                callback => mongodbClient.dropCollection('collection03',callback)
+              ],
+              err => {
+                expect(err).to.be.null;
+                cb();
+              });
             });
           });
       };
