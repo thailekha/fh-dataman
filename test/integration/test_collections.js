@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import statusCodes from '../../src/endpoints/statusCodes.js';
+import statusCodes from 'http-status-codes';
 import fhconfig from 'fh-config';
 chai.use(chaiHttp);
 var expect = chai.expect;
@@ -53,7 +53,7 @@ module.exports = {
           .set('Authorization', `Bearer ${TOKEN}`)
           .end((err, res) => {
             expect(err).to.be.null;
-            expect(res).to.have.status(statusCodes.SUCCESS);
+            expect(res).to.have.status(statusCodes.OK);
             expect(res).to.be.json;
             expect(res.body).to.have.lengthOf(4); //there will be system.users and system.indexes as well
             const col1 = res.body.filter(col => col.name === COLLECTIONS[0].name);
@@ -84,7 +84,7 @@ module.exports = {
          .set('Authorization', `Bearer ${TOKEN}`)
          .end((err, res) => {
            expect(err).to.be.null;
-           expect(res).to.have.status(statusCodes.SUCCESS);
+           expect(res).to.have.status(statusCodes.OK);
            expect(res.text).to.equal('test1,test2 collection(s) deleted');
            done();
          });
@@ -138,7 +138,7 @@ module.exports = {
         .set('Authorization', `Bearer ${TOKEN}`)
         .end((err, res) => {
           expect(err).to.be.not.null;
-          expect(res).to.have.status(statusCodes.UNSUPPORTED_MEDIA);
+          expect(res).to.have.status(statusCodes.UNSUPPORTED_MEDIA_TYPE);
           done();
         });
     }
