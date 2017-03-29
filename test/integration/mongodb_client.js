@@ -69,6 +69,19 @@ export function createCollectionsWithDocs(collections, cb) {
   });
 }
 
+export function getCollectionNames(cb) {
+  connectDb((err, db) => {
+    if (err) {
+      return cb(err);
+    }
+
+    var testDb = db.db(MONGO_DB_NAME);
+    testDb.listCollections().toArray(function(err, items) {
+      cb(items.map(item => item.name), testDb);
+    });
+  });
+}
+
 export function dropCollection(collection, cb) {
   connectDb((err, db) => {
     if (err) {

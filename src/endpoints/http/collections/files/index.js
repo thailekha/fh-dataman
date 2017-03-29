@@ -1,5 +1,5 @@
 import * as storage from './mongoStream';
-import statusCodes from '../../../statusCodes';
+import statusCodes from 'http-status-codes';
 
 /**
  * Derive a collection name from a file name.

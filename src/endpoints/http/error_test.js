@@ -2,7 +2,7 @@ import errorHandler from "./error.js";
 import sinon from "sinon";
 import assert from "assert";
 import {getLogger} from '../../logger';
-import statusCodes from '../statusCodes';
+import statusCodes from 'http-status-codes';
 
 const logger = getLogger();
 
