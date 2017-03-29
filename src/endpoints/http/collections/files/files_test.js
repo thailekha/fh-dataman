@@ -2,7 +2,7 @@ import assert from 'assert';
 import proxyquire from 'proxyquire';
 import fs from 'fs';
 import stream from 'stream';
-import statusCodes from '../../../statusCodes';
+import statusCodes from 'http-status-codes';
 
 
 class MockStream extends stream.Transform {

@@ -3,7 +3,7 @@ import createCollection from './create';
 import deleteCollections from './delete';
 import {insertCollections, getCollectionNames} from './files';
 import parseFile from '../../../middleware/parse-file';
-import statusCodes from '../../statusCodes';
+import statusCodes from 'http-status-codes';
 import authorize from '../../../middleware/route-authorize';
 
 const DUPLICATE_DOCUMENT_ID = 11000;
@@ -52,7 +52,7 @@ export function collectionsHandler(router) {
           return object.name;
         });
         req.log.trace({app: req.params.appGuid, names}, 'collection(s) deleted');
-        return res.status(statusCodes.SUCCESS).send(names.toString().concat(' collection(s) deleted'));
+        return res.status(statusCodes.OK).send(names.toString().concat(' collection(s) deleted'));
       })
       .catch(next);
   });
@@ -73,7 +73,7 @@ export function collectionsHandler(router) {
       .catch(err => {
         if (err.code === INCOMPATIBLE_DATA) {
           err.message = `File ${err.collectionName} unsupported`;
-          err.code = statusCodes.UNSUPPORTED_MEDIA;
+          err.code = statusCodes.UNSUPPORTED_MEDIA_TYPE;
         }
 
         if (err.code !== statusCodes.CONFLICT) {

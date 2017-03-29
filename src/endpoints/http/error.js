@@ -1,4 +1,4 @@
-import statusCodes from '../statusCodes';
+import statusCodes from 'http-status-codes';
 
 export default function errorHandler(err, req, res, next) {
   var responseData;

@@ -11,7 +11,7 @@ import {getLogger} from '../../../logger';
 import bodyParser from 'body-parser';
 import errorHandler from '../error';
 import sinonStubPromise from 'sinon-stub-promise';
-import statusCodes from '../../statusCodes';
+import statusCodes from 'http-status-codes';
 import fhconfig from 'fh-config';
 
 sinonStubPromise(sinon);
@@ -71,13 +71,13 @@ module.exports = {
     'test list handler': function(done) {
       supertest(app)
         .get(`/api/${appGuid}/collections`)
-        .expect(statusCodes.SUCCESS)
+        .expect(statusCodes.OK)
         .end(done);
     },
     'test delete handler': () => {
       supertest(app)
         .delete(`/api/${appGuid}/collections/names=collection1,collection2`)
-        .expect(statusCodes.SUCCESS)
+        .expect(statusCodes.OK)
         .then(function(res) {
           assert.equal(res.text, '"collection1,collection2 collection(s) deleted"');
         });
