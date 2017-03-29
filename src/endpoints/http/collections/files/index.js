@@ -15,6 +15,17 @@ export function getCollectionName(fileName) {
 }
 
 /**
+ * Derive collection names from a collection files.
+ *
+ * @param {Filestream[]} files
+ *
+ * @returns {String[]} collection names
+ */
+export function getCollectionNames(files) {
+  return files.map(file => getCollectionName(file.meta.fileName));
+}
+
+/**
  * Check for whether the proposed collection name already exists.
  *
  * @param {Array} collections - List of current collections in the db.
@@ -49,8 +60,24 @@ export function insertCollection(file, name, db) {
 
         file
           .pipe(insert)
-          .on('finish', resolve)
-          .on('error', reject);
+          .on('finish', () => resolve(name))
+          .on('error', err => {
+            err.collectionName = name;
+            reject(err);
+          });
       });
   });
+}
+
+/**
+ * Insert all the files contents into the database as getCollectionName.
+ * file contents are expected to be compatible with mongodb insert interface.
+ *
+ * @param {Filestream[]} files - Array of ReadStreams to read the file data from.
+ * @param {object} db - The mongodb connection.
+ *
+ * @returns {Promise}
+ */
+export function insertCollections(files, db) {
+  return Promise.all(files.map(file => insertCollection(file, getCollectionName(file.meta.fileName), db)));
 }

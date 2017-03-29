@@ -103,7 +103,44 @@ module.exports = {
           });
       };
 
-      async.eachSeries(['json', 'csv', 'bson'],  test, done);
+      async.eachSeries(['json', 'csv', 'bson'], test, done);
+    },
+
+    'test_zip_upload': function(done) {
+      const test = (zipName,cb) => {
+        chai.request(SERVER_URL)
+          .post(`${PATH_PREFIX}/collections/upload`)
+          .attach('file', fs.readFileSync(`${__dirname}/fixture/${zipName}.zip`), `${zipName}.zip` )
+          .set('Authorization', `Bearer ${TOKEN}`)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(statusCodes.CREATED);
+
+            async.parallel([
+              callback => mongodbClient.dropCollection('collection01',callback),
+              callback => mongodbClient.dropCollection('collection02',callback),
+              callback => mongodbClient.dropCollection('collection03',callback)
+            ],
+            err => {
+              expect(err).to.be.null;
+              cb();
+            });
+          });
+      };
+
+      async.eachSeries(['collections','import-MacOS'], test, done);
+    },
+
+    'test_zip_upload_unsupported_media': function(done) {
+      chai.request(SERVER_URL)
+        .post(`${PATH_PREFIX}/collections/upload`)
+        .attach('file', fs.readFileSync(`${__dirname}/fixture/unsupportedFiles.zip`), `unsupportedFiles.zip` )
+        .set('Authorization', `Bearer ${TOKEN}`)
+        .end((err, res) => {
+          expect(err).to.be.not.null;
+          expect(res).to.have.status(statusCodes.UNSUPPORTED_MEDIA);
+          done();
+        });
     }
   }
 };
