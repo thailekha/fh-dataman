@@ -1,6 +1,6 @@
 {
   "name": "fh-dataman",
-  "version": "0.1.1",
+  "version": "0.1.1-BUILD-NUMBER",
   "description": "A new backend for the databrowser",
   "main": "lib/app.js",
   "scripts": {
