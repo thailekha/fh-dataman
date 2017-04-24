@@ -6,6 +6,7 @@ import sinon from 'sinon';
 import * as createImpl from './create';
 import * as listImpl from './list';
 import * as deleteImpl from './delete';
+import * as exportImpl from './export/';
 import {collectionsHandler} from './index';
 import {getLogger} from '../../../logger';
 import bodyParser from 'body-parser';
@@ -22,13 +23,9 @@ var user = null;
 const appGuid = '123456';
 
 collectionsHandler(router);
-const dropCollecionStub = sinon.stub().returnsPromise();
 app.use(bodyParser.json());
 app.use((req, res, next) => {
   req.log = logger;
-  req.db = {
-    dropCollection: dropCollecionStub
-  };
   req.user = user;
   next();
 });
@@ -37,8 +34,8 @@ app.use(errorHandler);
 
 module.exports = {
   'test collection handlers': {
-    'before': function(done) {
-      sinon.stub(listImpl, 'default', function() {
+    'before': done => {
+      sinon.stub(listImpl, 'default', () => {
         console.log('use mock listImpl');
         return Promise.resolve([{'ns':'test.test1', 'name':'test1', 'count': 1, 'size': 100}, {'ns':'test.test2', 'name':'test2', 'count': 1, 'size': 100}]);
       });
@@ -50,7 +47,10 @@ module.exports = {
         console.log('use mock createImpl');
         return Promise.resolve(true);
       });
-      dropCollecionStub.resolves('collection1,collection2 collection(s) deleted');
+      sinon.stub(exportImpl, 'default', () => {
+        console.log('use mock exportImpl');
+        return Promise.resolve(true);
+      });
       fhconfig.init('config/dev.json', () => {
         user = {
           entity: {
@@ -64,23 +64,22 @@ module.exports = {
         done();
       });
     },
-    'after': function(done) {
+    'after': done => {
       sinon.restore();
       done();
     },
-    'test list handler': function(done) {
+    'test list handler': done => {
       supertest(app)
         .get(`/api/${appGuid}/collections`)
         .expect(statusCodes.OK)
         .end(done);
     },
-    'test delete handler': () => {
+    'test delete handler': done => {
       supertest(app)
-        .delete(`/api/${appGuid}/collections/names=collection1,collection2`)
+        .delete(`/api/${appGuid}/collections?names=collection1,collection2`)
         .expect(statusCodes.OK)
-        .then(function(res) {
-          assert.equal(res.text, '"collection1,collection2 collection(s) deleted"');
-        });
+        .expect(res => assert.equal(res.text, 'collection1,collection2 collection(s) deleted'))
+        .end(done);
     },
     'test delete handler names of collections required': done => {
       supertest(app)
@@ -88,19 +87,39 @@ module.exports = {
         .expect(statusCodes.BAD_REQUEST)
         .end(done);
     },
-    'test create handler': () => {
+    'test create handler': done => {
       supertest(app)
         .post(`/api/${appGuid}/collections`)
         .send({name: 'testCollection'})
         .expect(statusCodes.CREATED)
-        .then(function(res) {
-          assert.equal(res.text, 'testCollection collection deleted');
-        });
+        .expect(res => assert.equal(res.text, 'testCollection collection created'))
+        .end(done);
     },
     'test create handler name required': done => {
       supertest(app)
         .post(`/api/${appGuid}/collections`)
         .expect(statusCodes.BAD_REQUEST)
+        .end(done);
+    },
+
+    'test export handler': done => {
+      supertest(app)
+        .get(`/api/${appGuid}/collections/export?format=json`)
+        .expect(statusCodes.OK)
+        .end(done);
+    },
+
+    'test export handler format required': done => {
+      supertest(app)
+        .get(`/api/${appGuid}/collections/export?format=`)
+        .expect(statusCodes.BAD_REQUEST)
+        .end(done);
+    },
+
+    'test export handler unsupported media': done => {
+      supertest(app)
+        .get(`/api/${appGuid}/collections/export?format=txt`)
+        .expect(statusCodes.UNSUPPORTED_MEDIA_TYPE)
         .end(done);
     }
   }

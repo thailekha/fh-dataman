@@ -6,9 +6,9 @@ import chaiHttp from 'chai-http';
 import statusCodes from 'http-status-codes';
 import fhconfig from 'fh-config';
 chai.use(chaiHttp);
-var expect = chai.expect;
+const expect = chai.expect;
 import * as mongodbClient from './mongodb_client';
-var testConf = require('./test_conf.json');
+const testConf = require('./test_conf.json');
 
 const SERVER_URL = `http://localhost:${testConf.port}`;
 const PATH_PREFIX = '/api/testing/dev/testappguid/data';
@@ -77,7 +77,7 @@ module.exports = {
           });
     },
 
-    'testCollectionDelete': done => {
+    'test_collection_delete': done => {
       chai.request(SERVER_URL)
          .delete(`${PATH_PREFIX}/collections`)
          .query({names: 'test1,test2'})
@@ -86,7 +86,7 @@ module.exports = {
            expect(err).to.be.null;
            expect(res).to.have.status(statusCodes.OK);
            expect(res.text).to.equal('test1,test2 collection(s) deleted');
-           done();
+           mongodbClient.createCollectionsWithDocs(COLLECTIONS, done);
          });
     },
 
@@ -102,7 +102,6 @@ module.exports = {
             mongodbClient.dropCollection('import', cb);
           });
       };
-
       async.eachSeries(['json', 'csv', 'bson'], test, done);
     },
 
@@ -147,6 +146,47 @@ module.exports = {
           expect(res).to.have.status(statusCodes.UNSUPPORTED_MEDIA_TYPE);
           done();
         });
+    },
+
+    'test_collection_export': done => {
+      const test = (ext, cb) => {
+        chai.request(SERVER_URL)
+          .get(`${PATH_PREFIX}/collections/export`)
+          .query({ collections: 'test1', format: `${ext}` })
+          .set('Authorization', `Bearer ${TOKEN}`)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(statusCodes.OK);
+            cb();
+          });
+      };
+      async.eachSeries(['json', 'csv', 'bson'], test, done);
+    },
+
+    'test_collection_export_unsupported_media': done => {
+      chai.request(SERVER_URL)
+          .get(`${PATH_PREFIX}/collections/export`)
+          .query({ collections: 'test1', format: 'txt' })
+          .set('Authorization', `Bearer ${TOKEN}`)
+          .end(err => {
+            expect(err).to.have.status(statusCodes.UNSUPPORTED_MEDIA_TYPE);
+            done();
+          });
+    },
+
+    'test_all_collections_export': done => {
+      const test = (ext, cb) => {
+        chai.request(SERVER_URL)
+          .get(`${PATH_PREFIX}/collections/export`)
+          .query({ format: `${ext}` })
+          .set('Authorization', `Bearer ${TOKEN}`)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(statusCodes.OK);
+            cb();
+          });
+      };
+      async.eachSeries(['json', 'csv', 'bson'], test, done);
     }
   }
 };

@@ -134,6 +134,44 @@ paths:
           description: Application error
           schema:
             $ref: '#/definitions/ErrorResponse'
+  '/{domain}/{envId}/{appGuid}/data/collections/export':
+    parameters:
+      - $ref: "#/parameters/domain"
+      - $ref: "#/parameters/envId"
+      - $ref: "#/parameters/appGuid"
+    get:
+      summary: Export collection(s)
+      description: |
+        Exports a zip file containing collections in json, bson or csv format.
+      operationId: exportCollections
+      parameters:
+        - in: query
+          type: string
+          name: collections
+          description: The collection(s) to be exported
+          required: false
+        - in: query
+          type: string
+          name: format
+          description: The format the collections are to be exported in
+          required: true 
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: Successful collection(s) exported
+        '400':
+          description: No format requested
+          schema:
+            $ref: '#/definitions/BadRequestResponse'
+        '415':
+          description: Unsupported media type
+          schema:
+            $ref: '#/definitions/UnsupportedMediaTypeResponse'
+        '500':
+          description: Application error
+          schema:
+            $ref: '#/definitions/ErrorResponse'    
 parameters:
   domain:
     name: domain
