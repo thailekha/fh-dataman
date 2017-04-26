@@ -25,12 +25,14 @@ module.exports = {
     'before': function(done) {
       fhconfig.init('config/dev.json', () => {
         const payload = {
-          entity: {
-            guid: 'testappguid',
+          user: {
             email: "test@email.com",
             username: "user101",
             domain: "testing",
             sub: "1234subdomain"
+          },
+          entity: {
+            guid: 'testappguid'
           },
           permissions: [{
             businessObject: fhconfig.value('businessObject'),

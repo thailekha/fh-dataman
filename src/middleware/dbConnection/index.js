@@ -15,21 +15,27 @@ export default options => {
    */
 
   function middleware(req, res, next) {
-    const client = new fhMbaasClient.MbaasClient(req.envId, options);
+    const {domain, envId, appGuid} = req.params;
+    const appname = `${domain}-${appGuid}-${envId}`;
+    const {user, password, host, port, database} = options.ditch;
+
+    const client = new fhMbaasClient.MbaasClient(envId, options.mbaas);
     client.admin.apps.envVars.get({ // Get the app's environment variables by calling on fh-mbaas-client
-      domain: req.domain || {},
-      environment: req.envId,
-      appname: req.appname || {}
+      domain: domain,
+      environment: envId,
+      appname: appname
     }, function(err, resp) {
       if (err) {
         return next(err);
       }
-      req.log.debug({envvars: resp}, 'got env vars');
-      const appEnvVars = resp;
+
+      const appEnvVars = resp.env;
+      req.log.debug({appEnvVars}, 'got env vars');
       const isDedicatedDb = !!(appEnvVars && appEnvVars.FH_MONGODB_CONN_URL);
       const params = {
         __dbperapp: isDedicatedDb, // True for dedicated db and false for shared db
-        connectionUrl: isDedicatedDb ? appEnvVars.FH_MONGODB_CONN_URL : options.FH_MONGODB_CONN_URL
+        connectionUrl: isDedicatedDb ? appEnvVars.FH_MONGODB_CONN_URL : `mongodb://${user}:${password}@${host}:${port}/${database}`,
+        __fhdb: appname
       };
       fhdb.createMongoCompatApi(params).then(db => {
         req.log.info({db: db}, 'mongodb connection set');
