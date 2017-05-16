@@ -1,22 +1,44 @@
 {
-  "port":9000,
+  "environment": "production",
+  "https": {
+    "enabled": false
+  },
   "logger": {
-    "name": "logger",
-    "streams": [{
-      "type": "stream",
-      "src": true,
-      "level": "trace",
-      "stream": "process.stdout"
-    }, {
-      "type": "raw",
-      "src": true,
-      "level": "trace",
-      "stream": "ringBuffer"
-    }]
+    "name": "dataman",
+    "streams": [
+      {
+        "type": "file",
+        "stream": "file",
+        "path": "/var/log/feedhenry/fh-dataman/fh-dataman.log",
+        "level": "info"
+      },
+      {
+        "type": "raw",
+        "src": true,
+        "level": "info",
+        "colorize": true
+      }
+    ]
   },
   "auth": {
-    "secret": "secret"
+    "secret": "feedhenry101"
   },
   "businessObject": "databrowser",
-  "sizeLimit": 524288000
+  "port": 8822,
+  "sizeLimit": 524288000,
+  "rootUrl": "/",
+  "mbaas": {
+    "mbaasUrl": "node1.feedhenry.local",
+    "password": "feedhenry101",
+    "username": "feedhenry",
+    "service_key": "mBqxpulwlj3Rw7EsHZq0YEQyrArq2tlIRCQ0pCmr5DRPPDZMAP4ZNb7U0E6bPSb3"
+  },
+  "ditch": {
+    "host": "node1.feedhenry.local",
+    "port": 8802,
+    "service_key": "mkDlLB2Flftij2Et",
+    "user": "u-ditch",
+    "password": "password",
+    "database": "fh-ditch"
+  }
 }
