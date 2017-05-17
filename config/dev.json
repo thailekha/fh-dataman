@@ -28,15 +28,14 @@
   "sizeLimit": 524288000,
   "rootUrl": "/",
   "mbaas": {
-    "mbaasUrl": "node1.feedhenry.local",
+    "url": "api.feedhenry.me",
+    "protocol": "https",
     "password": "feedhenry101",
-    "username": "feedhenry",
-    "service_key": "mBqxpulwlj3Rw7EsHZq0YEQyrArq2tlIRCQ0pCmr5DRPPDZMAP4ZNb7U0E6bPSb3"
+    "username": "feedhenry"
   },
   "ditch": {
     "host": "node1.feedhenry.local",
-    "port": 8802,
-    "service_key": "mkDlLB2Flftij2Et",
+    "port": 27017,
     "user": "u-ditch",
     "password": "password",
     "database": "fh-ditch"
