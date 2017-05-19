@@ -36,6 +36,15 @@ module.exports = function(grunt) {
           ext: '.js'
         }]
       }
+    },
+
+    chmod: {
+      options: {
+        mode: '755'
+      },
+      binaries: {
+        src: ['lib/app.js']
+      }
     }
   });
 
@@ -44,7 +53,7 @@ module.exports = function(grunt) {
   grunt.registerTask('unit', ['eslint', 'fh:unit']);
   grunt.registerTask('integration', ['eslint', 'babel', 'fh:accept']);
 
-  grunt.registerTask('default', ['eslint', 'babel', 'fh:default']);
+  grunt.registerTask('default', ['eslint', 'babel', 'chmod', 'fh:default']);
 
   grunt.registerTask('coverage', ['clean:fh-cov', 'shell:fh-run-array:unit_cover']);
 };
