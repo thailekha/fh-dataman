@@ -50,7 +50,7 @@
     "fh-config": "1.1.0",
     "fh-db": "~2.0.1",
     "fh-logger": "0.5.1",
-    "fh-mbaas-client": "0.16.5",
+    "fh-mbaas-client": "git@github.com:feedhenry/fh-mbaas-client.git#5e2f2df3728fd21a52a5ca6c827d1231a49d5525",
     "http-status-codes": "^1.1.6",
     "jsonwebtoken": "7.2.1",
     "lodash": "4.17.2",
